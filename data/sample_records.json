@@ -1,0 +1,24 @@
+
+[
+  {
+    "id": "001",
+    "title": "Consumer Protection Act, 2019",
+    "category": "Consumer Law",
+    "description": "An Indian law that protects consumer rights and provides a mechanism for resolving consumer disputes.",
+    "source": "https://consumeraffairs.nic.in/"
+  },
+  {
+    "id": "002",
+    "title": "Consumer Protection (E-Commerce) Rules, 2020",
+    "category": "E-Commerce",
+    "description": "Rules covering consumer protection responsibilities of e-commerce entities.",
+    "source": "https://consumeraffairs.nic.in/"
+  },
+  {
+    "id": "003",
+    "title": "National Consumer Helpline",
+    "category": "Complaint Support",
+    "description": "A government service that helps consumers register grievances and seek assistance.",
+    "source": "https://consumerhelpline.gov.in/"
+  }
+]
