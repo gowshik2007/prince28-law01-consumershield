@@ -2,23 +2,52 @@
 [
   {
     "id": "001",
-    "title": "Consumer Protection Act, 2019",
-    "category": "Consumer Law",
-    "description": "An Indian law that protects consumer rights and provides a mechanism for resolving consumer disputes.",
-    "source": "https://consumeraffairs.nic.in/"
+    "case_no": null,
+    "commission": null,
+    "date": "2019-08-09",
+    "product_category": "All goods and services",
+    "issue": "Consumer rights, defects in goods, deficiency in services, and consumer dispute redressal.",
+    "outcome": "Consumer Protection Act, 2019. Reference: Act No. 35 of 2019. Covers consumer rights and remedies, including Sections 2(9), 35 and 39.",
+    "compensation": null
   },
   {
     "id": "002",
-    "title": "Consumer Protection (E-Commerce) Rules, 2020",
-    "category": "E-Commerce",
-    "description": "Rules covering consumer protection responsibilities of e-commerce entities.",
-    "source": "https://consumeraffairs.nic.in/"
+    "case_no": null,
+    "commission": null,
+    "date": "2020-07-23",
+    "product_category": "E-commerce goods and services",
+    "issue": "Consumer protection responsibilities and unfair trade practices in online shopping.",
+    "outcome": "Consumer Protection (E-Commerce) Rules, 2020. Official Gazette notification G.S.R. 462(E), dated 23 July 2020.",
+    "compensation": null
   },
   {
     "id": "003",
-    "title": "National Consumer Helpline",
-    "category": "Complaint Support",
-    "description": "A government service that helps consumers register grievances and seek assistance.",
-    "source": "https://consumerhelpline.gov.in/"
+    "case_no": null,
+    "commission": null,
+    "date": "2023-11-30",
+    "product_category": "Online platforms and digital services",
+    "issue": "Dark patterns that mislead consumers or manipulate their choices on digital platforms.",
+    "outcome": "Guidelines for Prevention and Regulation of Dark Patterns, 2023. Official Gazette notification dated 30 November 2023. Covers prohibited dark-pattern practices and examples in Annexure I.",
+    "compensation": null
+  },
+  {
+    "id": "004",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "product_category": "General consumer grievances",
+    "issue": "How consumers can register and track grievances through the National Consumer Helpline.",
+    "outcome": "The National Consumer Helpline is a pre-litigation grievance redressal mechanism. Consumers can register grievances online or by calling 1915 or 1800-11-4000. A unique docket number is issued.",
+    "compensation": null
+  },
+  {
+    "id": "005",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "product_category": "All consumer categories",
+    "issue": "Consumer rights relating to safety, information, choice, being heard, redressal and consumer education.",
+    "outcome": "The National Consumer Helpline explains the six consumer rights guaranteed under the Consumer Protection Act.",
+    "compensation": null
   }
 ]
