@@ -1,12 +1,10 @@
-import json
-
 import pytest
 from fastapi.testclient import TestClient
 
+from consumershield.api.deps import get_document_repository, get_session
 from consumershield.api.main import create_app
 from consumershield.config import Settings
 
-# Tiny fake records: tests never depend on your real data file.
 SAMPLE = [
     {"id": "001", "title": "Alpha guideline", "year": 2023},
     {"id": "002", "title": "Beta circular", "year": 2024},
@@ -14,15 +12,54 @@ SAMPLE = [
 ]
 
 
-@pytest.fixture
-def data_file(tmp_path):
-    path = tmp_path / "records.json"
-    path.write_text(json.dumps(SAMPLE), encoding="utf-8")
-    return path
+class FakeSession:
+    async def execute(self, statement):
+        return 1
+
+
+class FakeRepository:
+    async def list(self, *, q, filters, limit, offset):
+        records = SAMPLE
+
+        if q:
+            records = [record for record in records if q.lower() in str(record).lower()]
+
+        for key, value in filters.items():
+            records = [record for record in records if str(record.get(key)) == value]
+
+        total = len(records)
+        return total, records[offset : offset + limit]
+
+    async def get(self, external_id):
+        return next(
+            (record for record in SAMPLE if record["id"] == external_id),
+            None,
+        )
 
 
 @pytest.fixture
-def client(data_file):
-    settings = Settings(app_env="ci", data_file=data_file)
-    with TestClient(create_app(settings)) as c:
-        yield c
+def settings():
+    return Settings(
+        app_env="ci",
+        database_url="postgresql://localhost:5432/unused",
+        _env_file=None,
+    )
+
+
+@pytest.fixture
+def client(settings):
+    app = create_app(settings)
+
+    async def fake_session():
+        yield FakeSession()
+
+    def fake_repository():
+        return FakeRepository()
+
+    app.dependency_overrides[get_session] = fake_session
+    app.dependency_overrides[get_document_repository] = fake_repository
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    app.dependency_overrides.clear()

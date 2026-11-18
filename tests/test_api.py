@@ -1,9 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
 from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
 
-from consumershield.api.main import create_app
-from consumershield.config import Settings
+from consumershield.api.deps import get_session
 
 
 def test_health_is_ok(client):
@@ -12,17 +11,26 @@ def test_health_is_ok(client):
     assert r.json()["status"] == "ok"
 
 
-def test_ready_when_records_loaded(client):
+def test_ready_when_database_available(client):
     r = client.get("/ready")
     assert r.status_code == 200
-    assert r.json()["checks"]["records_loaded"] is True
+    assert r.json()["checks"]["database"] is True
 
 
-def test_ready_is_503_when_data_file_missing(tmp_path):
-    settings = Settings(app_env="ci", data_file=tmp_path / "missing.json")
-    with TestClient(create_app(settings)) as c:
-        assert c.get("/health").status_code == 200
-        assert c.get("/ready").status_code == 503
+def test_ready_is_503_when_database_unavailable(client):
+    class UnavailableSession:
+        async def execute(self, statement):
+            raise SQLAlchemyError("Database unavailable")
+
+    async def unavailable_session():
+        yield UnavailableSession()
+
+    client.app.dependency_overrides[get_session] = unavailable_session
+
+    r = client.get("/ready")
+    assert r.status_code == 503
+    assert r.json()["status"] == "not_ready"
+    assert r.json()["checks"]["database"] is False
 
 
 def test_list_documents_paginates(client):
@@ -60,6 +68,11 @@ def test_bad_limit_is_422_problem(client):
     assert r.json()["errors"][0]["field"] == "query.limit"
 
 
+def test_invalid_filter_name_is_400(client):
+    r = client.get("/v1/documents", params={"Bad-Name": "1"})
+    assert r.status_code == 400
+
+
 def test_request_id_is_echoed(client):
     r = client.get("/health", headers={"X-Request-ID": "abc123"})
     assert r.headers["X-Request-ID"] == "abc123"
@@ -67,5 +80,43 @@ def test_request_id_is_echoed(client):
 
 def test_app_refuses_to_start_without_app_env(monkeypatch):
     monkeypatch.delenv("APP_ENV", raising=False)
+    from consumershield.config import Settings
+
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+def test_list_documents_default_pagination(client):
+    r = client.get("/v1/documents")
+    body = r.json()
+
+    assert r.status_code == 200
+    assert body["total"] == 3
+    assert body["limit"] == 20
+    assert body["offset"] == 0
+
+
+def test_list_documents_with_offset(client):
+    r = client.get("/v1/documents", params={"limit": 1, "offset": 1})
+
+    assert r.status_code == 200
+    assert [item["id"] for item in r.json()["items"]] == ["002"]
+
+
+def test_filter_documents_by_year(client):
+    r = client.get("/v1/documents", params={"year": 2024})
+
+    assert r.status_code == 200
+    assert [item["id"] for item in r.json()["items"]] == ["002"]
+
+
+def test_limit_above_maximum_is_422(client):
+    r = client.get("/v1/documents", params={"limit": 101})
+
+    assert r.status_code == 422
+
+
+def test_search_query_too_long_is_422(client):
+    r = client.get("/v1/documents", params={"q": "a" * 201})
+
+    assert r.status_code == 422
