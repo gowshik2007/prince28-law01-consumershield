@@ -84,3 +84,39 @@ def test_app_refuses_to_start_without_app_env(monkeypatch):
 
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+def test_list_documents_default_pagination(client):
+    r = client.get("/v1/documents")
+    body = r.json()
+
+    assert r.status_code == 200
+    assert body["total"] == 3
+    assert body["limit"] == 20
+    assert body["offset"] == 0
+
+
+def test_list_documents_with_offset(client):
+    r = client.get("/v1/documents", params={"limit": 1, "offset": 1})
+
+    assert r.status_code == 200
+    assert [item["id"] for item in r.json()["items"]] == ["002"]
+
+
+def test_filter_documents_by_year(client):
+    r = client.get("/v1/documents", params={"year": 2024})
+
+    assert r.status_code == 200
+    assert [item["id"] for item in r.json()["items"]] == ["002"]
+
+
+def test_limit_above_maximum_is_422(client):
+    r = client.get("/v1/documents", params={"limit": 101})
+
+    assert r.status_code == 422
+
+
+def test_search_query_too_long_is_422(client):
+    r = client.get("/v1/documents", params={"q": "a" * 201})
+
+    assert r.status_code == 422

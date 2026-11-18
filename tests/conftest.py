@@ -38,8 +38,16 @@ class FakeRepository:
 
 
 @pytest.fixture
-def client():
-    settings = Settings(app_env="ci")
+def settings():
+    return Settings(
+        app_env="ci",
+        database_url="postgresql://localhost:5432/unused",
+        _env_file=None,
+    )
+
+
+@pytest.fixture
+def client(settings):
     app = create_app(settings)
 
     async def fake_session():
