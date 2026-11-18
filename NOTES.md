@@ -49,3 +49,45 @@ records=5 inserted=0 updated=1 unchanged=4
 - SHA-256 fingerprints detected modified records.
 - Original data restored successfully.
 - All database operations run inside one transaction.
+
+## Day 6 — EXPLAIN and GIN index
+
+### Query used
+
+```text
+python -m uv run python scripts/explain.py product_category "E-commerce goods and services"
+```
+
+### EXPLAIN output — Normal planner
+
+```text
+Seq Scan on documents  (cost=0.00..11.00 rows=1 width=36) (actual time=0.814..0.817 rows=1.00 loops=1)
+Filter: (metadata @> '{"product_category": "E-commerce goods and services"}'::jsonb)
+Rows Removed by Filter: 4
+Execution Time: 0.846 ms
+```
+
+### EXPLAIN output — Sequential scan disabled
+
+```text
+Bitmap Heap Scan on documents  (cost=12.81..16.82 rows=1 width=36) (actual time=2.038..2.039 rows=1.00 loops=1)
+Recheck Cond: (metadata @> '{"product_category": "E-commerce goods and services"}'::jsonb)
+Heap Blocks: exact=1
+-> Bitmap Index Scan on ix_documents_metadata_gin (cost=0.00..12.81 rows=1 width=0) (actual time=2.001..2.001 rows=1.00 loops=1)
+Index Cond: (metadata @> '{"product_category": "E-commerce goods and services"}'::jsonb)
+Execution Time: 2.088 ms
+```
+
+### Why did the planner choose a Seq Scan?
+
+The table currently contains only five records. Scanning all records is cheaper than using an index.
+
+### When would it switch to the GIN index?
+
+When the table grows and PostgreSQL estimates that an index scan will be more efficient than a sequential scan.
+
+### Result
+
+- Verified the normal query planner.
+- Confirmed the GIN index is usable.
+- Verified JSONB metadata filtering.
