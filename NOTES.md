@@ -91,3 +91,10 @@ When the table grows and PostgreSQL estimates that an index scan will be more ef
 - Verified the normal query planner.
 - Confirmed the GIN index is usable.
 - Verified JSONB metadata filtering.
+## Day 4 · Docker, Compose and tests
+
+### The image
+
+```text
+docker run --rm consumershield:dev id
+uid=999(app) gid=999(app)

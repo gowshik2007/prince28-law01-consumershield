@@ -33,19 +33,28 @@ Similar cases panel: describe your problem and see 3 decided cases with outcome 
 
 Correct commission and relevant precedent in top 3 for 85%+ of 30 scenarios.
 
-## Run it locally
+## Run locally in one command
+
+You need Docker Desktop running. From a fresh clone:
 
 ```bash
-uv sync
-cp .env.example .env   # Windows: copy .env.example .env
-uv run uvicorn consumershield.api.main:create_app --factory --reload
+docker compose up --build
 ```
 
-Then open http://localhost:8000/docs
+This starts Postgres (with pgvector), Redis, runs the migrations and loads the sample data once, then starts the API.
 
-## Checks
+- API docs: http://localhost:8000/docs
+- Liveness: http://localhost:8000/health
+- Readiness (checks the database): http://localhost:8000/ready
 
-```bash
-uv run pytest
-uv run ruff check .
-```
+Stop with `Ctrl+C`, then `docker compose down`. Add `-v` to also delete the database volume.
+
+## Develop and test
+
+| Task | Mac / Linux | Windows |
+|---|---|---|
+| Run the API with reload | `make dev` | `uv run poe dev` |
+| Unit tests (no network) | `make test` | `uv run poe test` |
+| Integration tests (needs `docker compose up`) | `make test-integration` | `uv run poe test-integration` |
+| Coverage report | `make cov` | `uv run poe cov` |
+| Lint and format check | `make lint` | `uv run poe lint` |
