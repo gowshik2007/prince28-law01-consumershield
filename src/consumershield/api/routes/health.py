@@ -28,7 +28,7 @@ async def ready(
     try:
         await session.execute(text("SELECT 1"))
         database_ok = True
-    except SQLAlchemyError:
+    except (SQLAlchemyError, OSError):
         database_ok = False
 
     checks = {"database": database_ok}
