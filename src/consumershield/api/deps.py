@@ -8,16 +8,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from consumershield.config import Settings
 from consumershield.db.repository import DocumentRepository
-from consumershield.db.session import SessionFactory
 
 
 def get_app_settings(request: Request) -> Settings:
     return request.app.state.settings
 
 
-async def get_session() -> AsyncIterator[AsyncSession]:
+async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
     """Provide one database session per request."""
-    async with SessionFactory() as session:
+    session_factory = request.app.state.session_factory
+    async with session_factory() as session:
         yield session
 
 
