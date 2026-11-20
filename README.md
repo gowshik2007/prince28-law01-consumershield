@@ -1,8 +1,11 @@
 # ConsumerShield
 
+[![CI](https://github.com/gowshik2007/prince28-law01-consumershield/actions/workflows/ci.yml/badge.svg)](https://github.com/gowshik2007/prince28-law01-consumershield/actions/workflows/ci.yml)
+[![Live](https://img.shields.io/website?url=https%3A%2F%2Fconsumershield-82yz.onrender.com%2Fhealth&label=live)](https://consumershield-82yz.onrender.com/docs)
+[![Uptime (30 days)](https://img.shields.io/uptimerobot/ratio/m804745837-9ac143bf4c955f8db7c4ce39)](https://consumershield-82yz.onrender.com/health)
 Helps consumers understand their rights and options for e-commerce and service complaints, with similar consumer-commission cases cited.
 
-**Status:** PostgreSQL data model, Alembic migrations, idempotent loader, database-backed API, Docker Compose, and automated tests implemented.
+**Status:** Week 1 complete · live at https://consumershield-82yz.onrender.com
 
 ## Who it's for
 

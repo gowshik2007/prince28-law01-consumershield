@@ -139,3 +139,61 @@ uid=999(app) gid=999(app)
 - Compose starts the API, PostgreSQL and Redis services.
 - Database readiness is verified.
 - Unit and integration test suites pass.
+
+## Day 5 — Live deployment, monitoring and rollback
+
+### Production
+
+- Live URL: https://consumershield-82yz.onrender.com
+- CI run (PR #4): https://github.com/gowshik2007/prince28-law01-consumershield/actions/runs/44699995646
+- Automatic CD run (PR #5): https://github.com/gowshik2007/prince28-law01-consumershield/actions/runs/44706349278
+- PR #5 merged: 2026-11-20 08:53:35 UTC.
+- Automatic deployment completed: 2026-11-20 08:55:58 UTC.
+- Merge-to-live time: 2 minutes 23 seconds.
+- Automatic deployment duration: 52 seconds.
+
+### Production smoke test
+
+```text
+ok   /health -> 200, git_sha 4d7fdbb0569f7254fe62a8500ba7280aad8cfa94
+ok   /ready -> 200, database True
+ok   /v1/documents?limit=1 -> 200
+Smoke test passed
+
+### Rollback drill
+
+- Rollback target SHA: cf9ed7ee0a78545b9de8ba8acaf9732e9c3f925e
+- Rollback run: https://github.com/gowshik2007/prince28-law01-consumershield/actions/runs/44708462362
+- Rollback duration: 44 seconds.
+- Rollback smoke test: all three endpoints passed.
+- Roll-forward SHA: 4d7fdbb0569f7254fe62a8500ba7280aad8cfa94
+- Roll-forward run: https://github.com/gowshik2007/prince28-law01-consumershield/actions/runs/44708765238
+- Roll-forward duration: 53 seconds.
+- Roll-forward smoke test: all three endpoints passed.
+- Final production health endpoint confirmed the roll-forward SHA.
+
+### Database safety
+
+- Rollback deployed an older application image without running migrations.
+- The database schema was not downgraded, and existing data was preserved.
+- The older application remained compatible with the current schema, confirmed by successful readiness and document API smoke tests.
+
+### Secrets and configuration
+
+- GitHub Actions secrets: RENDER_DEPLOY_HOOK and DATABASE_URL.
+- GitHub Actions variable: LIVE_URL.
+- Render environment variables: APP_ENV and DATABASE_URL.
+- Secret values are not stored in this file.
+
+### Monitoring
+
+- UptimeRobot monitors https://consumershield-82yz.onrender.com/health.
+- Check interval: 5 minutes.
+- Email alerts enabled.
+- Monitor-specific API key used for the public README uptime badge.
+- HEAD support added to /health because UptimeRobot uses HEAD requests. The fix will take effect after this branch is merged and deployed.
+
+### Cold start improvement
+
+- Render free services can spin down after inactivity.
+- An always-on paid instance avoids free-instance spin-down and reduces cold starts.

@@ -128,3 +128,8 @@ def test_search_query_too_long_is_422(client):
     r = client.get("/v1/documents", params={"q": "a" * 201})
 
     assert r.status_code == 422
+
+
+def test_health_supports_head_request(client):
+    r = client.head("/health")
+    assert r.status_code == 200
