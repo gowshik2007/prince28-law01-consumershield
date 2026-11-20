@@ -2,7 +2,7 @@
 
 Helps consumers understand their rights and options for e-commerce and service complaints, with similar consumer-commission cases cited.
 
-**Status:** Day 1 foundation (FastAPI skeleton, quality gates). Live URL from Day 5.
+**Status:** PostgreSQL data model, Alembic migrations, idempotent loader, database-backed API, Docker Compose, and automated tests implemented.
 
 ## Who it's for
 

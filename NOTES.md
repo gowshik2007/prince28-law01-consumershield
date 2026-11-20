@@ -1,5 +1,5 @@
 
-## Day 2 — Database migrations
+## Day 2 â€” Database migrations
 
 ### Migration history
 
@@ -18,7 +18,7 @@
 - Alembic history: Both migrations verified.
 
 
-## Day 3 — Idempotent loader
+## Day 3 â€” Idempotent loader
 
 ### Loader verification
 
@@ -50,7 +50,7 @@ records=5 inserted=0 updated=1 unchanged=4
 - Original data restored successfully.
 - All database operations run inside one transaction.
 
-## Day 6 — EXPLAIN and GIN index
+## Day 6 â€” EXPLAIN and GIN index
 
 ### Query used
 
@@ -58,7 +58,7 @@ records=5 inserted=0 updated=1 unchanged=4
 python -m uv run python scripts/explain.py product_category "E-commerce goods and services"
 ```
 
-### EXPLAIN output — Normal planner
+### EXPLAIN output â€” Normal planner
 
 ```text
 Seq Scan on documents  (cost=0.00..11.00 rows=1 width=36) (actual time=0.814..0.817 rows=1.00 loops=1)
@@ -67,7 +67,7 @@ Rows Removed by Filter: 4
 Execution Time: 0.846 ms
 ```
 
-### EXPLAIN output — Sequential scan disabled
+### EXPLAIN output â€” Sequential scan disabled
 
 ```text
 Bitmap Heap Scan on documents  (cost=12.81..16.82 rows=1 width=36) (actual time=2.038..2.039 rows=1.00 loops=1)
@@ -91,10 +91,51 @@ When the table grows and PostgreSQL estimates that an index scan will be more ef
 - Verified the normal query planner.
 - Confirmed the GIN index is usable.
 - Verified JSONB metadata filtering.
-## Day 4 · Docker, Compose and tests
+## Day 4 Â· Docker, Compose and tests
 
 ### The image
 
 ```text
 docker run --rm consumershield:dev id
 uid=999(app) gid=999(app)
+```
+
+### Docker image verification
+
+- Multi-stage Docker build completed successfully.
+- Runtime uses a non-root `app` user.
+- Image disk usage: approximately 300 MB.
+- Image content size: approximately 70 MB.
+
+### Docker Compose
+
+- PostgreSQL with pgvector.
+- Redis service.
+- API service.
+- Database migrations run before API startup.
+- Health checks and service dependencies configured.
+- `/health` returns HTTP 200 when the API is running.
+- `/ready` returns HTTP 503 when the database is unavailable.
+- `/ready` returns HTTP 200 after the database is restored.
+
+### Tests and coverage
+
+- Unit tests: 16 passed.
+- Integration tests: 7 passed.
+- Combined test coverage: 92%.
+- Unit-only coverage: 85%.
+- Integration tests use a separate test database.
+
+### Developer workflow
+
+- Makefile added for common development tasks.
+- Poe tasks added for Windows-compatible commands.
+- README includes local startup and testing instructions.
+
+### Result
+
+- Docker image builds successfully.
+- Application runs as a non-root user.
+- Compose starts the API, PostgreSQL and Redis services.
+- Database readiness is verified.
+- Unit and integration test suites pass.
