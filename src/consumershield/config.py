@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     data_file: Path = Path("data/sample_records.json")
 
     database_url: str = "postgresql://localhost:5432/consumershield"
+    git_sha: str = "dev"
 
 
 @lru_cache
