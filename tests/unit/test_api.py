@@ -9,6 +9,14 @@ def test_health_is_ok(client):
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
+    assert r.json()["git_sha"] == "dev"
+
+
+def test_health_returns_custom_git_sha(client, settings):
+    settings.git_sha = "test-commit-123"
+    r = client.get("/health")
+    assert r.status_code == 200
+    assert r.json()["git_sha"] == "test-commit-123"
 
 
 def test_ready_when_database_available(client):
