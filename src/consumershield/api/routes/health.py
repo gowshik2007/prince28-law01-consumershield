@@ -9,7 +9,7 @@ from consumershield.api.deps import SessionDep, SettingsDep
 router = APIRouter(tags=["health"])
 
 
-@router.get("/health")
+@router.api_route("/health", methods=["GET", "HEAD"])
 def health(settings: SettingsDep) -> dict[str, str]:
     """Liveness: is the application process alive?"""
     return {
