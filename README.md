@@ -124,7 +124,7 @@ Supporting project directories include:
 - Render deployment
 - UptimeRobot monitoring
 
-## Run locally
+## Run locally in one command
 
 ### Prerequisites
 

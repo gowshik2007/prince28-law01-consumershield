@@ -1,4 +1,3 @@
-
 [
   {
     "id": "001",
@@ -53,6 +52,186 @@
     "product_category": "All consumer categories",
     "issue": "Consumer rights relating to safety, information, choice, being heard, redressal and consumer education.",
     "outcome": "The National Consumer Helpline explains the six consumer rights guaranteed under the Consumer Protection Act.",
+    "compensation": null
+  },
+  {
+    "id": "006",
+    "title": "FAQs on Consumer Protection Act 2019",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/public/upload/admin/cmsfiles/whatsnews/New_Consumer_Protection_Act%2C_2019_-_FAQ_whatsnews.pdf",
+    "product_category": "Consumer law",
+    "issue": "Frequently asked questions about consumer definitions, rights and remedies.",
+    "outcome": "Official Department of Consumer Affairs FAQ reference.",
+    "compensation": null
+  },
+  {
+    "id": "007",
+    "title": "Consumer Rights",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-rights",
+    "product_category": "Consumer rights",
+    "issue": "Safety, information, choice, being heard, redressal and consumer education.",
+    "outcome": "Official explanation of the six consumer rights.",
+    "compensation": null
+  },
+  {
+    "id": "008",
+    "title": "Consumer Protection Unit",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/index.php/pages/consumer-protection-unit",
+    "product_category": "Consumer administration",
+    "issue": "Consumer commissions and the consumer protection administration system.",
+    "outcome": "Official overview of consumer protection administration.",
+    "compensation": null
+  },
+  {
+    "id": "009",
+    "title": "National Consumer Helpline",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/index.php/pages/nch",
+    "product_category": "Consumer grievances",
+    "issue": "Pre-litigation grievance registration and resolution through NCH.",
+    "outcome": "Official NCH channels include telephone, web portal and other digital channels.",
+    "compensation": null
+  },
+  {
+    "id": "010",
+    "title": "Public Grievance Procedure",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/index.php/pages/public-grivance",
+    "product_category": "Consumer grievances",
+    "issue": "Public grievance registration and coordination with the National Consumer Helpline.",
+    "outcome": "Official Department of Consumer Affairs public grievance information.",
+    "compensation": null
+  },
+  {
+    "id": "011",
+    "title": "Consumer Protection Direct Selling Rules 2021",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/public/upload/admin/cmsfiles/whatsnews/The_Consumer_Protection_Direct_Selling_Rules%2C_2021_whatsnews.pdf",
+    "product_category": "Direct selling",
+    "issue": "Consumer protection requirements for direct selling entities and sellers.",
+    "outcome": "Official Direct Selling Rules, 2021.",
+    "compensation": null
+  },
+  {
+    "id": "012",
+    "title": "Guidelines for Prevention of Misleading Advertisements 2022",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/public/upload/files/CCPA_Notification_1732707665.pdf",
+    "product_category": "Advertisements",
+    "issue": "Prevention of false or misleading advertisements and misleading endorsements.",
+    "outcome": "Official CCPA guidelines dated 9 June 2022.",
+    "compensation": null
+  },
+  {
+    "id": "013",
+    "title": "Consumer Protection Mediation Rules 2020",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "Consumer mediation",
+    "issue": "Rules governing mediation under consumer protection legislation.",
+    "outcome": "Listed in the official Department of Consumer Affairs rules directory.",
+    "compensation": null
+  },
+  {
+    "id": "014",
+    "title": "Consumer Disputes Redressal Commissions Rules 2020",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "Consumer commissions",
+    "issue": "Rules concerning consumer dispute redressal commissions.",
+    "outcome": "Listed in the official Department of Consumer Affairs rules directory.",
+    "compensation": null
+  },
+  {
+    "id": "015",
+    "title": "Consumer Protection General Rules 2020",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "Consumer law",
+    "issue": "General rules made under the Consumer Protection Act, 2019.",
+    "outcome": "Listed in the official Department of Consumer Affairs rules directory.",
+    "compensation": null
+  },
+  {
+    "id": "016",
+    "title": "Central Consumer Protection Council Rules 2020",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "Consumer councils",
+    "issue": "Rules concerning the Central Consumer Protection Council.",
+    "outcome": "Listed in the official Department of Consumer Affairs rules directory.",
+    "compensation": null
+  },
+  {
+    "id": "017",
+    "title": "Consumer Commission Procedure Regulations 2020",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "Consumer commissions",
+    "issue": "Procedure regulations for consumer dispute redressal commissions.",
+    "outcome": "Listed in the official Department of Consumer Affairs regulations directory.",
+    "compensation": null
+  },
+  {
+    "id": "018",
+    "title": "Consumer Mediation Regulations 2020",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "Consumer mediation",
+    "issue": "Regulations concerning mediation in consumer disputes.",
+    "outcome": "Listed in the official Department of Consumer Affairs regulations directory.",
+    "compensation": null
+  },
+  {
+    "id": "019",
+    "title": "Consumer Commission Jurisdiction Rules 2021",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "Consumer commissions",
+    "issue": "Rules concerning jurisdiction of District, State and National Commissions.",
+    "outcome": "Listed in the official Department of Consumer Affairs rules directory.",
+    "compensation": null
+  },
+  {
+    "id": "020",
+    "title": "Consumer Protection E-Commerce Amendment Rules 2021",
+    "case_no": null,
+    "commission": null,
+    "date": null,
+    "source_url": "https://consumeraffairs.gov.in/pages/consumer-protection-acts",
+    "product_category": "E-commerce",
+    "issue": "Amendment to the Consumer Protection E-Commerce Rules, 2020.",
+    "outcome": "Listed in the official Department of Consumer Affairs rules directory.",
     "compensation": null
   }
 ]
