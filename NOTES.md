@@ -68,7 +68,7 @@ This file records implementation work, verification results, and deployment evid
 - Upgrade head: Successful.
 - Alembic history: Both migrations verified.
 
-## Day 3 — Idempotent loader
+## D03 — PostgreSQL and idempotent loader
 
 ### Loader verification
 
@@ -154,7 +154,7 @@ uid=999(app) gid=999(app)
 - Database readiness is verified.
 - Unit and integration test suites pass.
 
-## Day 5 — Live deployment, monitoring and rollback
+## D05 — Live deployment, monitoring and rollback
 
 ### Production
 
