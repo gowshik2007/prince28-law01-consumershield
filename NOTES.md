@@ -14,9 +14,9 @@ This file records implementation work, verification results, and deployment evid
 ### Project planning
 
 - Added the project card and initial project description.
-- Documented the functional and non-functional requirements in `docs/REQUIREMENTS.md`.
+- Documented functional and non-functional requirements in `docs/REQUIREMENTS.md`.
 - Created 10 real-user evaluation questions in `docs/QUESTIONS.md`.
-- Identified the initial evaluation scenario: an engineering student in Chennai whose ₹45,000 laptop arrived damaged.
+- Identified the initial evaluation scenario: an engineering student in Chennai whose Rs 45,000 laptop arrived damaged.
 
 ### Code quality and security
 
@@ -64,11 +64,11 @@ This file records implementation work, verification results, and deployment evid
 - Migration 1: Created `documents` and `pages` tables.
 - Migration 2: Added GIN index on `documents.metadata`.
 - Downgrade -1: Successful.
-- Alembic current revision recorded during the intermediate verification: `5ce2b0a92557`.
+- Alembic current revision recorded during intermediate verification: `5ce2b0a92557`.
 - Upgrade head: Successful.
 - Alembic history: Both migrations verified.
 
-## D03 — PostgreSQL and idempotent loader
+## Day 3 — PostgreSQL and idempotent loader
 
 ### Loader verification
 
@@ -154,7 +154,7 @@ uid=999(app) gid=999(app)
 - Database readiness is verified.
 - Unit and integration test suites pass.
 
-## D05 — Live deployment, monitoring and rollback
+## Day 5 — Live deployment, monitoring and rollback
 
 ### Production
 
@@ -275,34 +275,99 @@ When the table grows and PostgreSQL estimates that an index scan will be more ef
 - Rollback and roll-forward drill completed.
 - Production deployment reports the expected Git SHA.
 
-## D06 — Corpus downloader and dataset verification
+## Day 6 — Corpus downloader and dataset verification
 
 ### Downloader implementation
 
-- Downloader CLI is available at `scripts/fetch.py`.
-- Download implementation is available at `src/consumershield/ingest/fetch.py`.
+- Downloader CLI: `scripts/fetch.py`.
+- Download implementation: `src/consumershield/ingest/fetch.py`.
 - Unit tests: 17 passed.
 - Full Ruff checks passed.
-- Full project test suite passed.
+- Full project test suite: 35 passed, 7 skipped.
 - Redirect destinations are checked against robots.txt.
 - Raw downloaded files are excluded from Git.
+- Pre-commit checks passed, including secret scanning.
 
-### Current corpus status
+### Registered dataset
+
+- Dataset: Open India Law — Central Indian Legislation Dataset.
+- Format: Parquet.
+- Source URL: https://oss-data-in.vaquill.ai/v2026.08.1/in_central_legislation.parquet
+- Dataset licence recorded in source register: CC BY 4.0.
+- Original legal text source URLs are retained in the processed records.
+- Downloaded file size: 26,515,484 bytes.
+- SHA-256 checksum recorded in `data/manifest.jsonl`:
+  `2a3aab1a2d7a8d3f2e87035870ff6f2f429d34d60b98dd6ab389502df0d4cb73`
+
+### Download verification
+
+Initial download:
 
 ```text
-sources=0 downloaded=0 skipped=0 blocked=0 failed=0 seconds=2.3
+[downloaded] 26,515,484 bytes
+sources=1 downloaded=1 skipped=0 blocked=0 failed=0 seconds=3.4
 ```
 
-- Approved sources registered: 0.
-- Manifest records: 0.
-- Downloaded documents: 0.
-- Raw documents: 0.
-- Manifest was not generated because no sources were registered.
+Repeat run:
+
+```text
+sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
+```
+
+### Corpus extraction
+
+- Source dataset records: 74,484.
+- Extracted records matching `The Consumer Protection Act, 2019`: 156.
+- Processed output: `data/processed/consumer_protection_act_2019.jsonl`.
+- Processed JSONL size: 207,129 bytes.
+- Extracted characters: 206,619.
+- Estimated tokens: 51,655.
+- Estimated chunks at 800 tokens with 100-token overlap: 74.
+- Text encoding verification: zero replacement characters and zero detected mojibake sequences.
+
+### Dataset report
+
+- `DATASET.md` generated with source and licence information.
+- Known gaps documented.
+- Processed JSONL is included in the corpus inventory.
+- Parquet extraction limitations are documented.
+- Estimated embedding storage: 0.43 MiB.
+- Estimated embedding cost: $0.001033 using the report's assumed price of $0.0200 per million tokens.
+- These are planning estimates, not measured embedding usage or billing.
+
+### Git and repository safety
+
+- `data/manifest.jsonl` committed.
+- `data/sources.csv` committed with dataset licence information.
+- Processed Consumer Protection Act JSONL committed.
+- Raw downloaded Parquet files remain ignored by Git.
+- `pyarrow` added to project dependencies.
+- Secret scanner baseline added for the reviewed public SHA-256 checksum.
+
+### Pull request and CI
+
+- PR #15: Add Consumer Protection Act corpus.
+- PR URL: https://github.com/gowshik2007/prince28-law01-consumershield/pull/15
+- PR merged successfully using squash merge.
+- CI build image: passed.
+- CI lint and test: passed.
+- Local pre-commit: all hooks passed.
+
+### Current measured downloader status
+
+```text
+sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
+```
+
+### Recovery verification and remaining limitation
+
+- Re-running the downloader confirmed that an already completed download is skipped rather than downloaded again.
+- This verifies repeat-run/idempotent skip behaviour.
+- A forced interruption during an active download followed by a partial-file resume has not yet been demonstrated.
+- Do not describe the skip test as proof of byte-range or partial-download resume.
 
 ### Remaining work
 
-- Register an approved source with verified reuse permissions.
-- Download and verify actual documents.
-- Generate manifest records.
-- Perform an interruption and recovery test.
-- Record measured download and processing capacity.
+- Record measured download and processing capacity in `docs/CAPACITY.md`.
+- Answer the four capacity-planning questions in `docs/CAPACITY.md`.
+- If partial-download recovery is a strict requirement, perform and document a separate interruption test.
