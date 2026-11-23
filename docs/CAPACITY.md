@@ -3,7 +3,7 @@
 
 ## 1. Current Dataset Status
 
-The initial dataset report found:
+Latest generated report:
 
 - Downloaded files: 0
 - PDF files: 0
@@ -11,8 +11,9 @@ The initial dataset report found:
 - Estimated tokens: 0
 - Estimated chunks: 0
 - Manifest records: 0
+- Approved sources registered: 0
 
-The downloader and reporting scripts are implemented, but corpus collection is not yet complete.
+Corpus collection has not started because no source has yet been confirmed as suitable for automated collection.
 
 ## 2. Processing Assumptions
 
@@ -45,26 +46,28 @@ Actual database storage will be higher because of indexes, metadata, and databas
 
 ## 4. Embedding Cost
 
-The dataset report currently uses a configurable placeholder of $0.02 per million input tokens.
+The dataset report uses a configurable placeholder of $0.02 per million input tokens.
 
-This is an estimation parameter only. Confirm the actual embedding provider and model price before budgeting or production use.
+This is an estimation parameter only. Confirm the actual embedding provider and model price before production use.
 
 ## 5. Storage and Deployment Considerations
 
 - Keep downloaded source documents under `data/raw/`.
 - Do not commit downloaded corpus files to Git.
 - Keep `data/manifest.jsonl` for download tracking.
-- Check the actual database and hosting plan limits before loading the complete corpus.
-- Monitor database storage, request limits, memory, and deployment resource usage.
-- Use incremental ingestion rather than repeatedly processing the entire corpus.
+- Check actual database and hosting plan limits before loading the corpus.
+- Monitor database storage, request limits, memory, and deployment resources.
+- Use incremental ingestion instead of repeatedly processing the entire corpus.
 
-## 6. Known Limitations and Next Steps
+## 6. Known Gaps
 
-- The current corpus is empty.
-- Source permissions and website crawling policies must be checked before downloading.
-- The target collection of legislation, rules, guidelines, and consumer orders remains outstanding.
-- PDF extraction must be checked for scanned pages and missing text.
-- Actual chunk counts and storage requirements must be measured after ingestion.
+- No approved sources are currently registered.
+- No corpus documents have been downloaded.
+- India Code automated access requires written permission.
+- The previously investigated data.gov.in resource was unusable.
+- Source permissions and robots policies must be checked before downloading.
+- PDF extraction must be tested for scanned pages and missing text.
+- Actual processing capacity cannot be measured until documents are collected.
 
 ## 7. Completion Criteria
 
