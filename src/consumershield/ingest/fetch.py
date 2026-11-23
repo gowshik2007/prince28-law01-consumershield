@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 
 import httpx
 from protego import Protego
@@ -81,6 +81,10 @@ class DownloadError(Exception):
         super().__init__(message)
         self.code = code
         self.retry_after = retry_after
+
+
+class RobotsBlocked(DownloadError):
+    pass
 
 
 def now_iso() -> str:
@@ -200,10 +204,12 @@ class Robots:
 
     async def _load(self, origin: str):
         try:
-            response = await self.client.get(origin + "/robots.txt")
+            response = await self.client.get(origin + "/robots.txt", follow_redirects=False)
         except httpx.HTTPError:
             return None
 
+        if 300 <= response.status_code < 400:
+            return None
         if response.status_code == 429 or response.status_code >= 500:
             return None
         if response.status_code == 404:
@@ -251,7 +257,7 @@ def make_client(max_concurrency: int = 4) -> httpx.AsyncClient:
         headers={"User-Agent": USER_AGENT},
         timeout=httpx.Timeout(30.0, connect=10.0),
         limits=httpx.Limits(max_connections=max_concurrency),
-        follow_redirects=True,
+        follow_redirects=False,
     )
 
 
@@ -260,44 +266,77 @@ async def _download(
     src: Source,
     root: Path,
     raw_dir: Path,
+    robots: Robots,
+    gate: HostGate,
 ) -> dict:
-    async with client.stream("GET", src.url) as response:
-        if response.status_code != 200:
-            raise DownloadError(
-                f"HTTP {response.status_code}",
-                code=response.status_code,
-                retry_after=retry_after_seconds(response.headers.get("Retry-After")),
-            )
+    current_url = src.url
+    visited = set()
 
-        content_type = response.headers.get("Content-Type", "")
-        name = file_stem(src.url) + pick_ext(src.url, content_type)
-        target = raw_dir / slug(src.source) / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        part = target.with_name(name + ".part")
+    for _ in range(11):
+        if current_url in visited:
+            raise DownloadError("Redirect loop detected")
+        visited.add(current_url)
 
-        digest = hashlib.sha256()
-        size = 0
+        parts = urlsplit(current_url)
+        if parts.scheme not in {"http", "https"} or not parts.netloc:
+            raise DownloadError("Redirect destination is not a valid HTTP(S) URL")
 
-        try:
-            with part.open("wb") as handle:
-                async for chunk in response.aiter_bytes():
-                    size += len(chunk)
-                    if size > MAX_BYTES:
-                        raise DownloadError(f"File exceeds {MAX_BYTES // 2**20} MB")
-                    digest.update(chunk)
-                    handle.write(chunk)
+        allowed, crawl_delay = await robots.check(current_url)
+        if not allowed:
+            raise RobotsBlocked("Redirect destination blocked by robots.txt or robots unavailable")
 
-            part.replace(target)
-        finally:
-            part.unlink(missing_ok=True)
+        await gate.wait(parts.netloc, crawl_delay)
 
-    return {
-        "path": target.relative_to(root).as_posix(),
-        "bytes": size,
-        "sha256": digest.hexdigest(),
-        "content_type": content_type.split(";")[0].strip(),
-        "http_status": 200,
-    }
+        async with client.stream(
+            "GET",
+            current_url,
+            follow_redirects=False,
+        ) as response:
+            if response.status_code in {301, 302, 303, 307, 308}:
+                location = response.headers.get("Location")
+                if not location:
+                    raise DownloadError("Redirect response has no Location header")
+                current_url = urljoin(current_url, location)
+                continue
+
+            if response.status_code != 200:
+                raise DownloadError(
+                    f"HTTP {response.status_code}",
+                    code=response.status_code,
+                    retry_after=retry_after_seconds(response.headers.get("Retry-After")),
+                )
+
+            content_type = response.headers.get("Content-Type", "")
+            name = file_stem(src.url) + pick_ext(src.url, content_type)
+            target = raw_dir / slug(src.source) / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            part = target.with_name(name + ".part")
+
+            digest = hashlib.sha256()
+            size = 0
+
+            try:
+                with part.open("wb") as handle:
+                    async for chunk in response.aiter_bytes():
+                        size += len(chunk)
+                        if size > MAX_BYTES:
+                            raise DownloadError(f"File exceeds {MAX_BYTES // 2**20} MB")
+                        digest.update(chunk)
+                        handle.write(chunk)
+
+                part.replace(target)
+            finally:
+                part.unlink(missing_ok=True)
+
+        return {
+            "path": target.relative_to(root).as_posix(),
+            "bytes": size,
+            "sha256": digest.hexdigest(),
+            "content_type": content_type.split(";")[0].strip(),
+            "http_status": 200,
+        }
+
+    raise DownloadError("Too many redirects")
 
 
 async def fetch_one(
@@ -320,15 +359,6 @@ async def fetch_one(
         "via": "http",
     }
 
-    allowed, crawl_delay = await robots.check(src.url)
-    if not allowed:
-        return record | {
-            "status": "blocked",
-            "error": "robots.txt or robots unavailable",
-            "fetched_at": now_iso(),
-        }
-
-    host = urlsplit(src.url).netloc
     error = ""
     code = None
 
@@ -336,11 +366,9 @@ async def fetch_one(
         wait = backoff_delay(attempt - 1)
 
         async with slots:
-            await gate.wait(host, crawl_delay)
-
             try:
                 async with asyncio.timeout(ATTEMPT_TIMEOUT):
-                    fields = await _download(client, src, root, raw_dir)
+                    fields = await _download(client, src, root, raw_dir, robots, gate)
 
                 return (
                     record
@@ -351,6 +379,13 @@ async def fetch_one(
                         "fetched_at": now_iso(),
                     }
                 )
+
+            except RobotsBlocked as exc:
+                return record | {
+                    "status": "blocked",
+                    "error": str(exc),
+                    "fetched_at": now_iso(),
+                }
 
             except DownloadError as exc:
                 error, code = str(exc), exc.code

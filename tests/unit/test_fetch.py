@@ -272,3 +272,54 @@ def test_fetch_all_does_not_retry_404(tmp_path):
             assert attempts == 1
 
     asyncio.run(run())
+
+
+def test_fetch_all_blocks_redirect_to_disallowed_host(tmp_path):
+    async def run():
+        requested = []
+
+        async def handler(request):
+            requested.append((request.url.host, request.url.path))
+
+            if request.url.path == "/robots.txt":
+                if request.url.host == "example.com":
+                    return httpx.Response(
+                        200,
+                        text="User-agent: *\nAllow: /\n",
+                    )
+                return httpx.Response(
+                    200,
+                    text="User-agent: *\nDisallow: /\n",
+                )
+
+            if request.url.host == "example.com":
+                return httpx.Response(
+                    302,
+                    headers={"Location": "https://blocked.example.net/file.pdf"},
+                )
+
+            pytest.fail("Blocked redirect destination must never be requested")
+
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(handler),
+            follow_redirects=False,
+        ) as client:
+            source = Source(
+                "https://example.com/redirect.pdf",
+                "test",
+                "Test terms",
+            )
+
+            result = await fetch_all(
+                [source],
+                root=tmp_path,
+                client=client,
+                per_host_delay=0,
+            )
+
+            assert result["blocked"] == 1
+            assert result["downloaded"] == 0
+            assert ("blocked.example.net", "/robots.txt") in requested
+            assert ("blocked.example.net", "/file.pdf") not in requested
+
+    asyncio.run(run())
