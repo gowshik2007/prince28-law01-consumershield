@@ -363,8 +363,10 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 
 - Re-running the downloader confirmed that an already completed download is skipped rather than downloaded again.
 - This verifies repeat-run/idempotent skip behaviour.
-- A forced interruption during an active download followed by a partial-file resume has not yet been demonstrated.
-- Do not describe the skip test as proof of byte-range or partial-download resume.
+- A real interrupted transfer was tested using a local HTTP server. The active download was cancelled after 524,288 bytes; the partial file was preserved.
+- The next request resumed at byte 524,288 and received HTTP 206 Partial Content.
+- Final file size: 8,388,608 bytes. SHA-256 matched the expected complete payload.
+- This verifies actual socket interruption and byte-range resume locally; an external-source interruption has not been tested.
 
 ### Remaining work
 
@@ -381,3 +383,14 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 - Dataset report regenerated: 875,445 extracted characters, approximately 218,862 tokens, and 313 estimated chunks.
 - Validation: 36 tests passed; Ruff lint passed; 45 files passed formatting check.
 - Remaining: 4 more CCPA listing records to reach 100, full order documents subject to permission, and the outstanding rules/guidelines corpus.
+
+
+### Actual interruption and resume test (23 November 2026)
+
+- Test method: active HTTP download interrupted by cancelling the running download task.
+- Bytes preserved at interruption: 524,288.
+- Resume request started at byte: 524,288.
+- Resume response: HTTP 206 Partial Content.
+- Final file size: 8,388,608 bytes.
+- SHA-256: matched the expected complete payload.
+- Result: PASSED using a local HTTP test server. No production corpus files were changed.

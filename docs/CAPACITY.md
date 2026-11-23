@@ -234,3 +234,8 @@ These figures come from the regenerated `DATASET.md` report:
 | PDF pages inspected | 0 |
 
 PDF pages per document and tokens per page cannot be measured because no PDF pages were inspected. The four capacity answers above remain planning estimates where applicable.
+
+
+### Additional recovery test evidence (23 November 2026)
+
+An active transfer was interrupted against a local HTTP test server. The downloader preserved 524,288 bytes, resumed from byte 524,288 with HTTP 206 Partial Content, and reconstructed the 8,388,608-byte payload with a matching SHA-256 checksum. This verifies interruption and byte-range resume locally; an external-source interruption remains untested.
