@@ -199,3 +199,22 @@ The estimate becomes approximately 516,550 tokens, 740 chunks, and 4.34 MiB of r
 - [ ] PDF page extraction and tokens-per-page measurement completed.
 - [ ] Real live network interruption and resume demonstrated.
 - [ ] Incremental corpus ingestion tested end to end.
+
+## Latest verified status ? 23 November 2026
+
+- Processed legislation records: 371 across three Act JSONL files.
+- Processed CCPA order-listing metadata records: 96.
+- Combined processed records: 467 (legislation and listing metadata; not all full legal documents).
+- CCPA full order documents downloaded: 0.
+- Dataset report: 875,445 extracted characters, approximately 218,862 tokens, and 313 estimated chunks.
+- Source register: 1 registered source (Open India Law).
+- Automated tests: 36 passed.
+- Ruff lint: passed.
+- Ruff format check: 45 files already formatted.
+
+### Remaining work
+
+- Reach the 100-record CCPA listing target: 4 additional records.
+- Obtain and process full CCPA order documents only after access permission and licence terms are verified.
+- Complete the required rules and guidelines corpus.
+- Reconcile capacity estimates with the latest dataset report.

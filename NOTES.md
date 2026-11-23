@@ -371,3 +371,13 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 - Record measured download and processing capacity in `docs/CAPACITY.md`.
 - Answer the four capacity-planning questions in `docs/CAPACITY.md`.
 - If partial-download recovery is a strict requirement, perform and document a separate interruption test.
+
+## Day 6 ? verified update (23 November 2026)
+
+- Processed 96 unique CCPA order-listing metadata records into `data/processed/ccpa_orders_metadata.jsonl`.
+- Original CCPA metadata remains preserved under `data/raw/ccpa-orders/`.
+- These records are listing metadata only; full order documents were not downloaded.
+- CCPA licence status remains unverified.
+- Dataset report regenerated: 875,445 extracted characters, approximately 218,862 tokens, and 313 estimated chunks.
+- Validation: 36 tests passed; Ruff lint passed; 45 files passed formatting check.
+- Remaining: 4 more CCPA listing records to reach 100, full order documents subject to permission, and the outstanding rules/guidelines corpus.
