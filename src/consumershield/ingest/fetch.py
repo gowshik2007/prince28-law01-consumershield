@@ -204,7 +204,10 @@ class Robots:
 
     async def _load(self, origin: str):
         try:
-            response = await self.client.get(origin + "/robots.txt", follow_redirects=False)
+            response = await self.client.get(
+                origin + "/robots.txt",
+                follow_redirects=False,
+            )
         except httpx.HTTPError:
             return None
 
@@ -249,7 +252,10 @@ class HostGate:
             pause = self.next_ok.get(host, 0.0) - time.monotonic()
             if pause > 0:
                 await self.sleep(pause)
-            self.next_ok[host] = time.monotonic() + max(self.delay, crawl_delay)
+            self.next_ok[host] = time.monotonic() + max(
+                self.delay,
+                crawl_delay,
+            )
 
 
 def make_client(max_concurrency: int = 4) -> httpx.AsyncClient:
@@ -272,6 +278,11 @@ async def _download(
     current_url = src.url
     visited = set()
 
+    # Keep the partial file independent of the final extension.
+    directory = raw_dir / slug(src.source)
+    directory.mkdir(parents=True, exist_ok=True)
+    part = directory / f"{file_stem(src.url)}.part"
+
     for _ in range(11):
         if current_url in visited:
             raise DownloadError("Redirect loop detected")
@@ -287,9 +298,15 @@ async def _download(
 
         await gate.wait(parts.netloc, crawl_delay)
 
+        offset = part.stat().st_size if part.exists() else 0
+        headers = {"Accept-Encoding": "identity"}
+        if offset:
+            headers["Range"] = f"bytes={offset}-"
+
         async with client.stream(
             "GET",
             current_url,
+            headers=headers,
             follow_redirects=False,
         ) as response:
             if response.status_code in {301, 302, 303, 307, 308}:
@@ -299,7 +316,13 @@ async def _download(
                 current_url = urljoin(current_url, location)
                 continue
 
-            if response.status_code != 200:
+            if response.status_code == 416 and offset:
+                # The server says the requested range is outside the file.
+                # Restart once from zero rather than trusting the partial file.
+                part.unlink(missing_ok=True)
+                raise DownloadError("Server rejected resume range; retrying from the beginning")
+
+            if response.status_code not in {200, 206}:
                 raise DownloadError(
                     f"HTTP {response.status_code}",
                     code=response.status_code,
@@ -308,32 +331,56 @@ async def _download(
 
             content_type = response.headers.get("Content-Type", "")
             name = file_stem(src.url) + pick_ext(src.url, content_type)
-            target = raw_dir / slug(src.source) / name
-            target.parent.mkdir(parents=True, exist_ok=True)
-            part = target.with_name(name + ".part")
+            target = directory / name
+
+            if response.status_code == 206:
+                content_range = response.headers.get("Content-Range", "")
+                match = re.fullmatch(
+                    r"bytes (\d+)-(\d+)/(\d+|\*)",
+                    content_range.strip(),
+                )
+                if not match or int(match.group(1)) != offset:
+                    raise DownloadError("Invalid Content-Range for partial download")
+                mode = "ab"
+                total_size = int(match.group(3)) if match.group(3) != "*" else None
+            else:
+                # A 200 response means the server ignored Range.
+                # Start over to avoid appending a duplicate response.
+                mode = "wb"
+                offset = 0
+                total_size = None
 
             digest = hashlib.sha256()
-            size = 0
+            size = offset
 
-            try:
-                with part.open("wb") as handle:
-                    async for chunk in response.aiter_bytes():
-                        size += len(chunk)
-                        if size > MAX_BYTES:
-                            raise DownloadError(f"File exceeds {MAX_BYTES // 2**20} MB")
+            if offset:
+                with part.open("rb") as existing:
+                    for chunk in iter(
+                        lambda: existing.read(1024 * 1024),
+                        b"",
+                    ):
                         digest.update(chunk)
-                        handle.write(chunk)
 
-                part.replace(target)
-            finally:
-                part.unlink(missing_ok=True)
+            with part.open(mode) as handle:
+                async for chunk in response.aiter_bytes():
+                    size += len(chunk)
+                    if size > MAX_BYTES:
+                        part.unlink(missing_ok=True)
+                        raise DownloadError(f"File exceeds {MAX_BYTES // 2**20} MB")
+                    digest.update(chunk)
+                    handle.write(chunk)
+
+            if total_size is not None and size != total_size:
+                raise DownloadError(f"Incomplete response: expected {total_size} bytes, got {size}")
+
+            part.replace(target)
 
         return {
             "path": target.relative_to(root).as_posix(),
             "bytes": size,
             "sha256": digest.hexdigest(),
             "content_type": content_type.split(";")[0].strip(),
-            "http_status": 200,
+            "http_status": response.status_code,
         }
 
     raise DownloadError("Too many redirects")
@@ -368,7 +415,14 @@ async def fetch_one(
         async with slots:
             try:
                 async with asyncio.timeout(ATTEMPT_TIMEOUT):
-                    fields = await _download(client, src, root, raw_dir, robots, gate)
+                    fields = await _download(
+                        client,
+                        src,
+                        root,
+                        raw_dir,
+                        robots,
+                        gate,
+                    )
 
                 return (
                     record
@@ -389,7 +443,7 @@ async def fetch_one(
 
             except DownloadError as exc:
                 error, code = str(exc), exc.code
-                if code not in RETRYABLE:
+                if code not in RETRYABLE and code != 416:
                     break
                 if exc.retry_after is not None:
                     if exc.retry_after > MAX_WAIT:
@@ -398,6 +452,7 @@ async def fetch_one(
                     wait = max(wait, exc.retry_after)
 
             except (httpx.TransportError, TimeoutError) as exc:
+                # Preserve the .part file so the next attempt can resume.
                 error, code = type(exc).__name__, None
 
             except httpx.HTTPError as exc:
