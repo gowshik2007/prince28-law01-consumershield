@@ -274,3 +274,35 @@ When the table grows and PostgreSQL estimates that an index scan will be more ef
 - UptimeRobot-compatible HEAD health check verified.
 - Rollback and roll-forward drill completed.
 - Production deployment reports the expected Git SHA.
+
+## D06 — Corpus downloader and dataset verification
+
+### Downloader implementation
+
+- Downloader CLI is available at `scripts/fetch.py`.
+- Download implementation is available at `src/consumershield/ingest/fetch.py`.
+- Unit tests: 17 passed.
+- Full Ruff checks passed.
+- Full project test suite passed.
+- Redirect destinations are checked against robots.txt.
+- Raw downloaded files are excluded from Git.
+
+### Current corpus status
+
+```text
+sources=0 downloaded=0 skipped=0 blocked=0 failed=0 seconds=2.3
+```
+
+- Approved sources registered: 0.
+- Manifest records: 0.
+- Downloaded documents: 0.
+- Raw documents: 0.
+- Manifest was not generated because no sources were registered.
+
+### Remaining work
+
+- Register an approved source with verified reuse permissions.
+- Download and verify actual documents.
+- Generate manifest records.
+- Perform an interruption and recovery test.
+- Record measured download and processing capacity.
