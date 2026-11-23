@@ -263,6 +263,18 @@ def main():
         ]
     )
 
+    generated_pdf = root / "data" / "processed" / "capacity_test_corpus.pdf"
+    if generated_pdf.exists():
+        report.extend(
+            [
+                "## Generated PDF test artifact",
+                "",
+                "- Derived from processed JSONL; not an original government-source PDF.",
+                "- Its text overlaps with JSONL and is counted twice in combined inventory totals.",
+                "",
+            ]
+        )
+
     if unsupported_files:
         report.extend(["## Unsupported files", ""])
         report.extend(f"- `{name}`" for name in unsupported_files)
