@@ -12,9 +12,9 @@ Latest corpus collection and dataset report:
 | Source dataset records | 74,484 |
 | Consumer Protection Act, 2019 records extracted | 156 |
 | Processed JSONL size | 207,129 bytes |
-| Extracted characters | 206,619 |
-| Estimated tokens | 51,655 |
-| Estimated chunks | 74 |
+| Extracted characters | 875,445 |
+| Estimated tokens | 218,862 |
+| Estimated chunks | 313 |
 | Manifest records | 1 |
 | Download duration | 3.4 seconds |
 | Repeat-run duration | 0.3 seconds |
@@ -47,13 +47,13 @@ Each vector requires:
 
 1,536 dimensions x 4 bytes = 6,144 bytes.
 
-For the current estimated 74 chunks:
+For the current estimated 313 chunks:
 
-74 x 6,144 = 454,656 bytes, approximately 0.43 MiB.
+313 x 6,144 = 1,923,072 bytes, approximately 1.83 MiB.
 
 | Number of chunks | Approximate raw vector storage |
 |---:|---:|
-| 74 (current estimate) | 0.43 MiB |
+| 313 (current estimate) | 1.83 MiB |
 | 1,000 | 5.86 MiB |
 | 5,000 | 29.30 MiB |
 | 10,000 | 58.59 MiB |
@@ -66,9 +66,9 @@ Actual database storage will be higher because of indexes, metadata, and databas
 
 The dataset report uses an assumed price of $0.02 per million input tokens.
 
-For the current estimated 51,655 tokens:
+For the current estimated 218,862 tokens:
 
-51,655 / 1,000,000 x $0.02 = approximately $0.001033.
+218,862 / 1,000,000 x $0.02 = approximately $0.004377.
 
 At the planning exchange rate of ₹95 per USD, this is approximately ₹0.10.
 
@@ -91,7 +91,7 @@ Production database capacity was checked using PostgreSQL.
 
 The database size includes existing application data and is not exclusively corpus storage.
 
-The estimated current raw vector storage is approximately 0.43 MiB. The current estimated text and vector data are small compared with the available 1 GB storage allowance. Indexes, metadata, application growth, and other database overhead must still be considered.
+The estimated current raw vector storage is approximately 1.83 MiB. The current estimated text and vector data are small compared with the available 1 GB storage allowance. Indexes, metadata, application growth, and other database overhead must still be considered.
 
 ## 6. Download and Recovery Verification
 
@@ -136,15 +136,15 @@ One Parquet source file was downloaded successfully. It contains 74,484 source r
 
 ### Q2. How much processing capacity does the current corpus require?
 
-The processed text contains 206,619 characters, approximately 51,655 estimated tokens, and approximately 74 chunks using the current 800-token chunk size and 100-token overlap.
+The processed text contains 875,445 characters, approximately 218,862 estimated tokens, and approximately 313 chunks using the current 800-token chunk size and 100-token overlap.
 
 ### Q3. What is the estimated vector storage requirement?
 
-At 1,536 dimensions and float32 precision, 74 estimated vectors require approximately 0.43 MiB of raw vector storage. Database indexes and metadata will increase actual storage requirements.
+At 1,536 dimensions and float32 precision, 313 estimated vectors require approximately 1.83 MiB of raw vector storage. Database indexes and metadata will increase actual storage requirements.
 
 ### Q4. What is the estimated embedding cost?
 
-At the report's assumed rate of $0.02 per million tokens, processing 51,655 estimated tokens would cost approximately $0.001033, or about ₹0.10 at ₹95 per USD. This is not actual provider billing.
+At the report's assumed rate of $0.02 per million tokens, processing 218,862 estimated tokens would cost approximately $0.004377, or about ₹0.10 at ₹95 per USD. This is not actual provider billing.
 
 ### Q5. What is the least certain capacity assumption?
 
@@ -152,11 +152,11 @@ The token estimate uses a rough ratio of four characters per token. A production
 
 ### Q6. Can the current corpus fit in the free database plan?
 
-The current database uses approximately 7.70 MiB of the 1 GB storage allowance. The estimated raw vectors require approximately 0.43 MiB. The current corpus is small enough for the available storage, although indexes, metadata, and future application growth must be monitored.
+The current database uses approximately 7.70 MiB of the 1 GB storage allowance. The estimated raw vectors require approximately 1.83 MiB. The current corpus is small enough for the available storage, although indexes, metadata, and future application growth must be monitored.
 
 ### Q7. What happens if the corpus grows ten times?
 
-The estimate becomes approximately 516,550 tokens, 740 chunks, and 4.34 MiB of raw vectors. The estimated embedding cost becomes approximately $0.01033. This remains small compared with the 1 GB storage allowance, before database overhead.
+The estimate becomes approximately 2,188,620 tokens, 3,130 chunks, and 18.31 MiB of raw vectors. The estimated embedding cost becomes approximately $0.01033. This remains small compared with the 1 GB storage allowance, before database overhead.
 
 ## 9. Storage and Deployment Considerations
 
@@ -218,3 +218,19 @@ The estimate becomes approximately 516,550 tokens, 740 chunks, and 4.34 MiB of r
 - Obtain and process full CCPA order documents only after access permission and licence terms are verified.
 - Complete the required rules and guidelines corpus.
 - Reconcile capacity estimates with the latest dataset report.
+
+
+## Latest dataset measurements
+
+These figures come from the regenerated `DATASET.md` report:
+
+| Metric | Latest value |
+|---|---:|
+| Extracted characters | 875,445 |
+| Estimated tokens | 218,862 |
+| Estimated chunks | 313 |
+| Estimated raw vector storage | 1.83 MiB |
+| Estimated embedding cost at $0.02/million tokens | $0.004377 |
+| PDF pages inspected | 0 |
+
+PDF pages per document and tokens per page cannot be measured because no PDF pages were inspected. The four capacity answers above remain planning estimates where applicable.
