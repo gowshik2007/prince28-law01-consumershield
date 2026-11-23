@@ -16,6 +16,7 @@ TEXT_EXTENSIONS = {
     ".rst",
     ".csv",
     ".json",
+    ".jsonl",
     ".xml",
     ".yaml",
     ".yml",
@@ -68,7 +69,6 @@ def estimate_chunks(tokens: int, chunk_size: int, overlap: int) -> int:
 def load_manifest(path: Path) -> list[dict]:
     if not path.exists():
         return []
-
     records = []
     for line in path.read_text(encoding="utf-8").splitlines():
         try:
@@ -82,7 +82,6 @@ def load_sources(path: Path) -> list[dict]:
     """Load source register while ignoring comment lines."""
     if not path.exists():
         return []
-
     lines = [
         line
         for line in path.read_text(encoding="utf-8-sig").splitlines()
@@ -90,7 +89,6 @@ def load_sources(path: Path) -> list[dict]:
     ]
     if not lines:
         return []
-
     return list(csv.DictReader(lines))
 
 
@@ -119,15 +117,19 @@ def main():
         parser.error("Dimensions must be positive and price cannot be negative")
 
     root = args.root.resolve()
-    raw_dir = root / "data" / "raw"
     manifest_path = root / "data" / "manifest.jsonl"
     sources_path = root / "data" / "sources.csv"
 
     sources = load_sources(sources_path)
     manifest = load_manifest(manifest_path)
 
-    files = (
-        sorted(path for path in raw_dir.rglob("*") if path.is_file()) if raw_dir.exists() else []
+    data_dirs = [root / "data" / "raw", root / "data" / "processed"]
+    files = sorted(
+        path
+        for directory in data_dirs
+        if directory.exists()
+        for path in directory.rglob("*")
+        if path.is_file()
     )
 
     total_chars = 0
@@ -141,7 +143,6 @@ def main():
     for path in files:
         if path.name.endswith(".part"):
             continue
-
         suffix = path.suffix.lower()
 
         try:
@@ -149,21 +150,16 @@ def main():
                 pdf_count += 1
                 reader = PdfReader(str(path), strict=False)
                 pdf_pages_total += len(reader.pages)
-
                 remaining = max(0, args.full_pages - pdf_pages_read)
                 pages_to_read = min(len(reader.pages), remaining)
-
                 for page in reader.pages[:pages_to_read]:
                     total_chars += len(page.extract_text() or "")
                     pdf_pages_read += 1
-
             elif suffix in TEXT_EXTENSIONS:
                 total_chars += len(read_text(path))
                 text_files += 1
-
             else:
                 unsupported_files.append(path.relative_to(root).as_posix())
-
         except Exception as exc:
             errors.append(f"{path.relative_to(root).as_posix()}: {type(exc).__name__}: {exc}")
 
@@ -202,24 +198,17 @@ def main():
     else:
         report.append("| No approved sources registered | — | — |")
 
-    report.extend(
-        [
-            "",
-            "## Known gaps",
-            "",
-        ]
-    )
-
+    report.extend(["", "## Known gaps", ""])
     if not sources:
         report.append("- No approved sources are currently registered.")
     if not files:
         report.append("- No corpus files have been collected.")
     if not manifest:
         report.append("- No manifest records are available.")
+    report.append("- India Code automated access requires written permission.")
 
     report.extend(
         [
-            "- India Code automated access requires written permission.",
             "",
             "## Corpus inventory",
             "",
@@ -260,11 +249,15 @@ def main():
             "",
             "- Token counts are approximate; characters divided by four is not a tokenizer.",
             "- PDF extraction may miss scanned pages, tables, or complex layouts.",
-            "- Unsupported file formats are listed but not extracted.",
-            "- Vector storage estimates float32 vectors only; database indexes "
-            "and metadata add overhead.",
-            "- Embedding cost is a planning estimate using the supplied price, "
-            "not a billing quote.",
+            "- Parquet files are not extracted directly; the processed JSONL corpus is inspected.",
+            (
+                "- Vector storage estimates float32 vectors only; "
+                "database indexes and metadata add overhead."
+            ),
+            (
+                "- Embedding cost is a planning estimate using the supplied price, "
+                "not a billing quote."
+            ),
             f"- PDF extraction is capped at {args.full_pages:,} pages for this run.",
             "",
         ]
@@ -282,7 +275,6 @@ def main():
 
     output = root / "DATASET.md"
     output.write_text("\n".join(report), encoding="utf-8")
-
     print("\n".join(report))
     print(f"\nReport saved to: {output}")
 
