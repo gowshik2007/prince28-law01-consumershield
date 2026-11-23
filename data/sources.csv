@@ -1,4 +1,6 @@
 ﻿# ConsumerShield source register
-# India Code excluded: automated access requires written permission.
+# Dataset licence: CC BY 4.0. Attribution required.
+# Original legal text sources remain identified in the dataset metadata.
 
 url,source,licence,title
+https://oss-data-in.vaquill.ai/v2026.08.1/in_central_legislation.parquet,Open India Law,CC BY 4.0,Central Indian Legislation Dataset
