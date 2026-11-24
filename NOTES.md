@@ -394,3 +394,153 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 - Final file size: 8,388,608 bytes.
 - SHA-256: matched the expected complete payload.
 - Result: PASSED using a local HTTP test server. No production corpus files were changed.
+
+## Day 7 — Document parsing and first corpus batch
+
+### Parser implementation
+
+- Added PDF parsing using PyMuPDF and pypdf.
+- Added HTML parsing using Trafilatura.
+- Added text and structured-data parsing, including JSONL.
+- Added text cleaning, repeated-line removal, page splitting and heading extraction.
+- Added database storage for parsed documents, pages and parse failures.
+- Added `scripts/parse_corpus.py` to generate and parse documents from the Open India Law Parquet dataset.
+
+### First batch verification
+
+- Source dataset: 74,484 legal-section records.
+- Distinct Acts in dataset: 1,568.
+- Generated legal documents: 20.
+- Successfully parsed and stored: 20.
+- Failed documents: 0.
+- Total parsed pages: 6,455.
+- Total runtime: 25.5 seconds.
+- Neon database verification: 20 documents returned.
+- Page-content verification: 5 pages inspected.
+- Parser recorded as `plain` for all 20 generated Markdown documents.
+
+### Observation
+
+- Parsed page text contains meaningful legal content and section information.
+- Page headings can retain a previous section heading when a page continues into another section. For example, the inspected Motor Vehicles Act page 157 contains content from Sections 215 and 216 while its stored heading path starts at Section 215.
+- This is a heading-continuity limitation to investigate during further parser improvements.
+
+### Result
+
+- First 20 derived legal documents successfully parsed and stored in Neon.
+- Document metadata and page records verified using SQL.
+- No parse failures in the first batch.
+
+## Day 7 - Part 4: Full corpus parsing and failure verification
+
+### Full corpus parsing
+
+- Source dataset: Open India Law Parquet dataset.
+- Total source records: 74,484 legal-section records.
+- Distinct Acts: 1,568.
+- Generated Markdown documents: 1,568.
+- Newly parsed documents: 1,548.
+- Previously parsed documents: 20.
+- Total documents parsed and stored: 1,568.
+- Pages reported by first parser run: 22,772.
+- First run duration: 697.7 seconds.
+- Second run: 0 newly parsed, 1,568 already parsed, 0 failures, 0 new pages.
+- Second run duration: 27.6 seconds.
+
+### Failure verification
+
+- Neon parse_failures table: 0 rows.
+- Failure groups by reason: none.
+- Retry was unnecessary because no failures were recorded.
+
+### Neon database verification
+
+- Parsed documents: 1,568.
+- Total pages recorded in document metadata: 29,227.
+- Actual stored page rows: 29,227.
+- Document metadata page total matches the pages table count.
+
+### Result and limitation
+
+- All 1,568 available Acts were generated, parsed and stored.
+- Re-running the parser confirmed that already-parsed documents are skipped.
+- No parse failures were recorded.
+- This available Parquet corpus contains 1,568 Acts; it is not the separate 364-file HTML/Markdown/PDF corpus mentioned in the original exercise.
+
+## Day 7 - Part 5: Parser comparison
+
+| File | Format | Parser A | Parser B | A pages | B pages | A chars | B chars | A tables | B tables | A time (s) | B time (s) | Review / result |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| data/raw/007-Document_Parsing_PDFs_HTML_Tables_OCR.pdf | .pdf | PyMuPDF | pypdf | 13 | 13 | 15432 | 14850 | 12 | 2 | 2.333 | 0.287 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-scanned.pdf | .pdf | PyMuPDF | pypdf | 0 | 0 | 0 | 0 | 0 | 0 | 0.027 | 0.006 | One or both parsers failed; inspect errors |
+| data/processed/capacity_test_corpus.pdf | .pdf | PyMuPDF | pypdf | 106 | 106 | 430983 | 426913 | 0 | 0 | 1.045 | 1.748 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/Fitness Journal.html | .html | Trafilatura | Plain tag-stripping | 1 | 1 | 383 | 1337 | 0 | 0 | 0.061 | 0.010 | Plain tag-stripping extracted more characters; inspect quality |
+| data/raw/sample-table-no-gridlines.pdf | .pdf | PyMuPDF | pypdf | 1 | 1 | 555 | 539 | 0 | 0 | 0.043 | 0.018 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-multipage.pdf | .pdf | PyMuPDF | pypdf | 10 | 10 | 7096 | 6811 | 0 | 0 | 0.079 | 0.148 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-scanned-table.pdf | .pdf | PyMuPDF | pypdf | 0 | 0 | 0 | 0 | 0 | 0 | 0.049 | 0.003 | One or both parsers failed; inspect errors |
+| data/raw/sample-two-column.pdf | .pdf | PyMuPDF | pypdf | 2 | 2 | 5051 | 4967 | 0 | 0 | 0.039 | 0.093 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-bank-statement.pdf | .pdf | PyMuPDF | pypdf | 2 | 2 | 2682 | 2568 | 0 | 0 | 0.201 | 0.074 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-invoice.pdf | .pdf | PyMuPDF | pypdf | 1 | 1 | 984 | 900 | 1 | 0 | 0.131 | 0.024 | PyMuPDF extracted more characters; inspect quality |
+
+### Manual inspection
+
+- Inspected three stored legal documents in Neon: The Companies Act, 2013; The Customs Tariff Act, 1975; and The Income-tax Act, 1961.
+- All three documents contained meaningful extracted text. Page 2 had heading metadata; page 1 had an empty heading array.
+- Companies Act: 546 pages, 93 tables and 1,573,723 characters.
+- Customs Tariff Act: 712 pages, 601 tables and 1,803,883 characters.
+- Income-tax Act: 1,288 pages, 20 tables and 3,692,599 characters.
+
+### Parser comparison observations
+
+- data/raw/007-Document_Parsing_PDFs_HTML_Tables_OCR.pdf: PyMuPDF extracted 15432 characters and 12 tables in 2.333s; pypdf extracted 14850 characters and 2 tables in 0.287s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/sample-scanned.pdf: PyMuPDF extracted 0 characters and 0 tables in 0.027s; pypdf extracted 0 characters and 0 tables in 0.006s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/processed/capacity_test_corpus.pdf: PyMuPDF extracted 430983 characters and 0 tables in 1.045s; pypdf extracted 426913 characters and 0 tables in 1.748s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/Fitness Journal.html: Trafilatura extracted 383 characters and 0 tables in 0.061s; Plain tag-stripping extracted 1337 characters and 0 tables in 0.010s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/sample-table-no-gridlines.pdf: PyMuPDF extracted 555 characters and 0 tables in 0.043s; pypdf extracted 539 characters and 0 tables in 0.018s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/sample-multipage.pdf: PyMuPDF extracted 7096 characters and 0 tables in 0.079s; pypdf extracted 6811 characters and 0 tables in 0.148s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/sample-scanned-table.pdf: PyMuPDF extracted 0 characters and 0 tables in 0.049s; pypdf extracted 0 characters and 0 tables in 0.003s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/sample-two-column.pdf: PyMuPDF extracted 5051 characters and 0 tables in 0.039s; pypdf extracted 4967 characters and 0 tables in 0.093s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/sample-bank-statement.pdf: PyMuPDF extracted 2682 characters and 0 tables in 0.201s; pypdf extracted 2568 characters and 0 tables in 0.074s. Character counts alone do not establish extraction quality; inspect the actual content.
+- data/raw/sample-invoice.pdf: PyMuPDF extracted 984 characters and 1 tables in 0.131s; pypdf extracted 900 characters and 0 tables in 0.024s. Character counts alone do not establish extraction quality; inspect the actual content.
+
+### Corpus limitation
+
+- Available PDF files in data/: 9.
+- Available HTML files in data/: 1.
+- Files compared in this run: 10.
+- HTML parser comparison has been tested using Fitness Journal.html.
+- The ten-file comparison requirement is complete: 9 PDFs and 1 HTML file were compared.
+- The original separate 364-file corpus was not available; public sample PDFs were used to complete the ten-file comparison.
+
+
+## D07 - Parsing my corpus
+
+### D07 - Parsing my corpus
+
+- Files in the manifest: 1,569 (including 1 source Parquet dataset) - parsed: 1,568 - failed: 0 - pages in Postgres: 29,227.
+- Parsing coverage: 100% of 1,568 individual Act documents (excluding the source Parquet entry).
+
+### Failures by reason
+
+| Reason | Files | What I did |
+|---|---:|---|
+| None | 0 | No parse failures were recorded; no retry or fix was required. |
+
+- The one I fixed: None. No individual file failure was recorded.
+
+### What I saw when I read my parsed pages
+
+- A page where the heading path is right: Abkari, Bengal Act, 1840, page 2, Section XI.
+- Something that came out wrong: Abkari, Calcutta, 1849, page 2 contains Sections IV and IX, but the heading path identifies only Section IV.
+- A table: The Customs Tariff Act, 1975, page 1. The extracted content uses loose text with pipe separators, not a Markdown grid.
+
+### My parser choice
+
+- For PDFs I use PyMuPDF because the 007 sample PDF produced 15,432 characters and 12 tables, compared with pypdf's 14,850 characters and 2 tables.
+- PyMuPDF extracted more table content in that comparison, although pypdf was faster (0.287 seconds versus 2.333 seconds).
+- A kind of document neither parser handles well: scanned/image-only PDFs without an embedded text layer; both require OCR.
+
+### One thing that went wrong today, and how I fixed it
+
+- The Neon database hostname temporarily failed DNS resolution during a parser retry.
+- I checked DNS resolution, waited for connectivity to recover, and reran the parser successfully. The second run confirmed 1,568 documents already parsed and zero failures.
