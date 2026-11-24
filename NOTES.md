@@ -1,8 +1,8 @@
-# ConsumerShield â€” Development Notes
+# ConsumerShield — Development Notes
 
 This file records implementation work, verification results, and deployment evidence from Day 1 onward.
 
-## Day 1 â€” Project foundation and FastAPI skeleton
+## Day 1 — Project foundation and FastAPI skeleton
 
 ### Project setup
 
@@ -50,7 +50,7 @@ This file records implementation work, verification results, and deployment evid
 - Quality checks and secret scanning configured.
 - Initial API test coverage established.
 
-## Day 2 â€” Database migrations
+## Day 2 — Database migrations
 
 ### Migration history
 
@@ -68,7 +68,7 @@ This file records implementation work, verification results, and deployment evid
 - Upgrade head: Successful.
 - Alembic history: Both migrations verified.
 
-## Day 3 â€” PostgreSQL and idempotent loader
+## Day 3 — PostgreSQL and idempotent loader
 
 ### Loader verification
 
@@ -104,7 +104,7 @@ records=5 inserted=0 updated=1 unchanged=4
 - Original data restored successfully.
 - All database operations run inside one transaction.
 
-## Day 4 â€” Docker, Compose and tests
+## Day 4 — Docker, Compose and tests
 
 ### Docker image
 
@@ -154,7 +154,7 @@ uid=999(app) gid=999(app)
 - Database readiness is verified.
 - Unit and integration test suites pass.
 
-## Day 5 â€” Live deployment, monitoring and rollback
+## Day 5 — Live deployment, monitoring and rollback
 
 ### Production
 
@@ -212,7 +212,7 @@ Smoke test passed
 - Render free services can spin down after inactivity.
 - An always-on paid instance avoids free-instance spin-down and reduces cold starts.
 
-## Day 6 â€” EXPLAIN and GIN index
+## Day 6 — EXPLAIN and GIN index
 
 ### Query used
 
@@ -220,7 +220,7 @@ Smoke test passed
 python -m uv run python scripts/explain.py product_category "E-commerce goods and services"
 ```
 
-### EXPLAIN output â€” Normal planner
+### EXPLAIN output — Normal planner
 
 ```text
 Seq Scan on documents (cost=0.00..11.00 rows=1 width=36) (actual time=0.814..0.817 rows=1.00 loops=1)
@@ -229,7 +229,7 @@ Rows Removed by Filter: 4
 Execution Time: 0.846 ms
 ```
 
-### EXPLAIN output â€” Sequential scan disabled
+### EXPLAIN output — Sequential scan disabled
 
 ```text
 Bitmap Heap Scan on documents (cost=12.81..16.82 rows=1 width=36) (actual time=2.038..2.039 rows=1.00 loops=1)
@@ -255,7 +255,7 @@ When the table grows and PostgreSQL estimates that an index scan will be more ef
 - Verified JSONB metadata filtering.
 - Observed that the sequential scan was faster for the small five-record dataset.
 
-## Final deployment verification â€” November 20, 2026
+## Final deployment verification — November 20, 2026
 
 ### Latest deployment
 
@@ -275,7 +275,7 @@ When the table grows and PostgreSQL estimates that an index scan will be more ef
 - Rollback and roll-forward drill completed.
 - Production deployment reports the expected Git SHA.
 
-## Day 6 â€” Corpus downloader and dataset verification
+## Day 6 — Corpus downloader and dataset verification
 
 ### Downloader implementation
 
@@ -290,7 +290,7 @@ When the table grows and PostgreSQL estimates that an index scan will be more ef
 
 ### Registered dataset
 
-- Dataset: Open India Law â€” Central Indian Legislation Dataset.
+- Dataset: Open India Law — Central Indian Legislation Dataset.
 - Format: Parquet.
 - Source URL: https://oss-data-in.vaquill.ai/v2026.08.1/in_central_legislation.parquet
 - Dataset licence recorded in source register: CC BY 4.0.
@@ -395,7 +395,7 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 - SHA-256: matched the expected complete payload.
 - Result: PASSED using a local HTTP test server. No production corpus files were changed.
 
-## Day 7 â€” Document parsing and first corpus batch
+## Day 7 — Document parsing and first corpus batch
 
 ### Parser implementation
 
