@@ -772,3 +772,20 @@ Usage and billing verification:
 - Dockerfile updated to include prompts.
 - Render API keys configured.
 - Final deployment and live URL testing remain pending.
+
+
+### Live production streaming test
+
+- Production endpoint: `https://consumershield-82yz.onrender.com/v1/chat`
+- Test question: What rights does a consumer have under the Consumer Protection Act 2019?
+- Provider: Groq
+- Model: `openai/gpt-oss-20b`
+- First words latency: **1.40 seconds**
+- Total response time: **1.62 seconds**
+- Input tokens: 247
+- Output tokens: 349
+- Cost: ₹0.011706
+- Attempts: 1
+- Fallback used: Yes
+
+**Result:** Live streaming successfully returned a response. The LLM gateway, fallback mechanism, and production usage tracking were verified.
