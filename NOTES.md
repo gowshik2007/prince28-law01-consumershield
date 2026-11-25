@@ -544,3 +544,231 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 
 - The Neon database hostname temporarily failed DNS resolution during a parser retry.
 - I checked DNS resolution, waited for connectivity to recover, and reran the parser successfully. The second run confirmed 1,568 documents already parsed and zero failures.
+
+English vs Tamil token experiment:
+Hi (baseline): 233 tokens
+English message: 241 tokens
+Tamil message: 255 tokens
+English message tokens: 8
+Tamil message tokens: 22
+Tamil needs 2.75 times more tokens than English.
+
+Off-topic test:
+Question: Who won the 2011 cricket world cup?
+Result: Model replied "I am not sure."
+Expected: Decline off-topic questions in one sentence.
+Observation: It declined, but did not explain that cricket is outside ConsumerShield's subject.
+
+Known-answer test 1:
+Question: What is the time limit for filing a consumer complaint under the Consumer Protection Act, 2019?
+Expected: Two years from the date the cause of action arises.
+Result: Model answered correctly (two years).
+Observation: Correct answer, but it was generated using Groq fallback.
+
+Known-answer test 2:
+Question: Can a consumer complaint be filed after two years?
+Expected: Yes, if the District Commission is satisfied that there was sufficient cause for the delay.
+Result: Model mentioned a possible extension but described it too narrowly.
+Observation: Partially correct; needs more precise legal explanation.
+
+Usage and billing verification:
+- /v1/usage successfully displays daily calls, errors, fallbacks, tokens and estimated cost.
+- Neon llm_calls table records individual provider attempts.
+- Failed Gemini calls have status=error, tokens_in=0, tokens_out=0 and cost_inr=0.
+- Successful Groq fallback calls have status=ok and fallback_used=true.
+- Latency and estimated cost are recorded.
+- Current estimated total cost: Rs 0.185.
+
+## Day 08 — LLM gateway, fallback, streaming and usage tracking
+
+### Part 1–4: LLM gateway and chat API
+
+- Configured Gemini as the primary LLM provider.
+- Configured Groq as the fallback provider.
+- Added LLM settings to `config.py`, `.env` and `.env.example`.
+- Added `httpx` for API requests.
+- Added the `LlmCall` database model and Alembic migration.
+- Implemented the LLM gateway with retry, fallback, circuit breaker and streaming support.
+- Added `FakeLLM` for testing without real API calls.
+- Added LLM usage recording and daily usage summaries.
+- Created `prompts/chat_system_v1.md`.
+- Implemented POST `/v1/chat` with streaming and JSON responses.
+- Implemented GET `/v1/usage`.
+- Added `scripts/ask.py` for testing the chat API.
+
+### Tests and quality checks
+
+- Gateway unit tests: 19 passed.
+- Chat API tests: 7 passed.
+- Full test suite: 78 passed.
+- Ruff lint: all checks passed.
+- Ruff formatting: 66 files already formatted after formatting.
+- Local integration test requiring `TEST_DATABASE_URL` was skipped.
+
+### Local chat verification
+
+- Streaming response successfully tested.
+- JSON response successfully tested.
+- Gemini failures correctly triggered Groq fallback.
+- Request IDs were recorded in the logs.
+- Successful chat requests returned HTTP 200.
+- An earlier consumer-rights question produced:
+  - First words after: 8.48 seconds.
+  - Total time: 9.20 seconds.
+  - Input tokens: 247.
+  - Output tokens: 476.
+  - Provider: Groq fallback.
+
+### Part 5: Break it on purpose
+
+#### Tokens: English against Tamil
+
+| Message | Tokens in |
+|---|---:|
+| "Hi" (baseline: mostly my system prompt) | 233 |
+| English refund sentence | 241 |
+| Same refund sentence in Tamil | 255 |
+
+- English message tokens: 241 − 233 = 8.
+- Tamil message tokens: 255 − 233 = 22.
+- Tamil message needs approximately 2.75 times the tokens of English.
+
+#### What the model does without my documents
+
+- Question: "Will the seller refund me if I complain today?"
+- The model admitted it could not know the particular seller's decision.
+- Its response began: "I'm not sure whether this particular seller will refund you if you complain today."
+- It then provided general guidance about return policies and complaint options.
+
+**Off-topic test**
+
+- Question: "Who won the 2011 cricket world cup?"
+- Result: Model replied "I am not sure."
+- Expected: Decline off-topic questions in one sentence.
+- Observation: It declined, but did not explain that cricket is outside ConsumerShield's subject.
+
+**Known-answer test 1**
+
+- Question: What is the time limit for filing a consumer complaint under the Consumer Protection Act, 2019?
+- Expected: Two years from the date the cause of action arises.
+- Result: Model answered correctly (two years).
+- Observation: Correct answer, but it was generated using Groq fallback.
+
+**Known-answer test 2**
+
+- Question: Can a consumer complaint be filed after two years?
+- Expected: Yes, if the District Commission is satisfied that there was sufficient cause for the delay.
+- Result: Model mentioned a possible extension but described it too narrowly.
+- Observation: Partially correct; needs more precise legal explanation.
+
+#### Fallback and circuit breaker
+
+- Temporarily changed the primary model to `gemini-no-such-model`.
+- Restarted the application.
+- First three requests attempted Gemini and received HTTP 404 errors.
+- Groq successfully answered all four requests.
+- On the fourth request, the Gemini error stopped appearing in the logs because the circuit breaker was open.
+- Waited 30 seconds.
+- After the wait, Gemini was attempted again, demonstrating the half-open recovery attempt.
+- The test model was replaced with the original configured value: `gemini-3.8-flash`.
+- After restoring it, Gemini returned HTTP 429 Too Many Requests.
+- Groq continued answering successfully.
+
+**Result**
+
+- Fallback mechanism: Passed.
+- Circuit breaker opening: Passed.
+- Half-open retry: Observed.
+- Successful Gemini recovery: Not confirmed because of HTTP 429 rate limiting.
+
+#### The bill
+
+**`/v1/usage` verification**
+
+| Metric | Value |
+|---|---:|
+| Date | 2026-11-25 |
+| Calls | 30 |
+| Errors | 14 |
+| Fallbacks | 16 |
+| Input tokens | 3,940 |
+| Output tokens | 5,507 |
+| Estimated cost | ₹0.185 |
+
+**Neon database verification**
+
+- Queried the latest 15 records from `llm_calls`.
+- Failed Gemini calls were recorded with `status=error`.
+- Failed Gemini calls had zero input and output tokens.
+- Failed Gemini calls had zero estimated cost.
+- Successful Groq calls were recorded with `status=ok`.
+- Groq fallback calls had `fallback_used=true`.
+- Latency and estimated cost were recorded.
+
+**Result**
+
+- `/v1/usage` successfully displays daily usage.
+- Neon records individual provider attempts.
+- Estimated total cost: Rs 0.185.
+
+### Part 6: Ship it
+
+#### Docker image
+
+- Added `COPY --chown=app:app prompts ./prompts` immediately after the data COPY instruction in the Dockerfile.
+- This ensures the prompt directory is included in the Docker image.
+
+#### Render environment variables
+
+- Added `GEMINI_API_KEY` to the Render service environment.
+- Added `GROQ_API_KEY` to the Render service environment.
+- Used the same values as the local `.env` file.
+- API keys were not added to GitHub Secrets.
+
+#### Local and live performance
+
+- Primary: `gemini-3.8-flash` (Gemini).
+- Fallback: `openai/gpt-oss-20b` (Groq).
+
+- First question on my laptop:
+  - First words after: 8.48 seconds.
+  - Total: 9.20 seconds.
+  - Tokens in: 247.
+  - Tokens out: 476.
+  - Cost: To be confirmed from the recorded call.
+
+- Same question on my live URL (second, awake request):
+  - First words after: Pending deployment test.
+  - Day 1 target: under 1.5 seconds.
+
+#### Deployment verification
+
+- Dockerfile updated to include the prompts directory.
+- Render environment variables saved.
+- Git commit and push: Pending.
+- Pull request and CI checks: Pending.
+- Merge to main: Pending.
+- Production deployment: Pending.
+- Live `/health` verification: Pending.
+- Live chat streaming test: Pending.
+- Live `/v1/usage` verification: Pending.
+
+#### One thing that went wrong today, and how I fixed it
+
+- The intentionally invalid Gemini model returned HTTP 404.
+- The circuit breaker stopped repeatedly calling the failed primary provider.
+- Groq successfully handled fallback requests.
+- After restoring the original Gemini model, Gemini returned HTTP 429 because of rate limiting.
+- The application continued working through Groq fallback.
+
+### Final Day 08 status
+
+- LLM gateway implemented.
+- Gemini and Groq configured.
+- Streaming and JSON chat endpoints tested.
+- Usage tracking implemented and verified.
+- Fallback and circuit breaker tested.
+- Neon usage records verified.
+- Dockerfile updated to include prompts.
+- Render API keys configured.
+- Final deployment and live URL testing remain pending.
