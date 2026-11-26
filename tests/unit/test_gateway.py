@@ -78,7 +78,7 @@ async def test_falls_back_when_the_primary_keeps_failing():
     result = await h.gateway.generate(ASK)
     assert (result.provider, result.fallback_used) == ("groq", True)
     assert primary.calls == 2 and backup.calls == 1
-    assert [row["status"] for row in h.rows] == ["error", "ok"]  # both calls are on record
+    assert [row["status"] for row in h.rows] == ["error", "ok"]
 
 
 async def test_a_wrong_api_key_is_not_retried():
@@ -104,11 +104,11 @@ async def test_the_circuit_opens_then_tests_the_provider_again_after_the_cooldow
     backup = FakeLLM("groq")
     h = Harness(primary, backup, breaker_threshold=3, breaker_cooldown=30)
     for _ in range(3):
-        await h.gateway.generate(ASK)  # three failures in a row: the circuit opens
+        await h.gateway.generate(ASK)
     assert h.gateway.breakers["gemini"].state == "open"
     await h.gateway.generate(ASK)
-    assert primary.calls == 3  # the fourth question never touched the broken provider
-    h.now += 31  # the cooldown passes: one test call is allowed
+    assert primary.calls == 3
+    h.now += 31
     result = await h.gateway.generate(ASK)
     assert result.provider == "gemini" and h.gateway.breakers["gemini"].state == "closed"
 
@@ -122,7 +122,7 @@ def test_circuit_breaker_states():
     assert breaker.state == "open" and not breaker.allow()
     now[0] = 11
     assert breaker.state == "half-open" and breaker.allow()
-    breaker.failure()  # the test call failed: open again, for a new cooldown
+    breaker.failure()
     assert breaker.state == "open"
     now[0] = 22
     breaker.success()
@@ -163,7 +163,6 @@ async def test_a_broken_recorder_never_breaks_an_answer():
 
 
 def test_cost_uses_the_price_table_and_is_zero_for_unknown_models():
-    # 1M tokens in at $0.75 + 1M out at $3.75 = $4.50 = Rs 427.50 at Rs 95
     assert cost_inr("gemini-3.8-flash", 1_000_000, 1_000_000, 95.0) == 427.5
     assert cost_inr("some-new-model", 1000, 1000, 95.0) == 0.0
 
@@ -178,10 +177,12 @@ class NoUsage(FakeLLM):
 async def test_missing_token_counts_are_estimated_from_the_text():
     h = Harness(NoUsage("gemini", "gemini-3.8-flash"))
     result = await h.gateway.generate([{"role": "user", "content": "y" * 400}])
-    assert (result.tokens_in, result.tokens_out) == (100, 10)  # about 4 characters per token
+    assert (result.tokens_in, result.tokens_out) == (100, 10)
 
 
 # ---- the real HTTP provider, against a fake server (httpx.MockTransport) ----
+
+
 def provider_with(handler) -> OpenAICompatProvider:
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
     return OpenAICompatProvider("gemini", "https://llm.test/v1/", "k-123", "m-1", client=client)
@@ -249,9 +250,9 @@ async def test_a_stream_that_stops_without_saying_done_is_an_error():
     with pytest.raises(LLMError, match="ended early"):
         async for piece in provider_with(handler).stream(ASK, Reply()):
             pieces.append(piece)
-    assert pieces == ["Half an "]  # what arrived was passed on; then the truth was told
+    assert pieces == ["Half an "]
 
-    def finished(request: httpx.Request) -> httpx.Response:  # no [DONE], but a finish_reason
+    def finished(request: httpx.Request) -> httpx.Response:
         last = '{"choices": [{"delta": {"content": "Done."}, "finish_reason": "stop"}]}'
         return httpx.Response(200, text=f"data: {last}\n\n")
 
@@ -271,3 +272,26 @@ async def test_a_timeout_moves_on_but_a_dropped_connection_is_worth_one_retry():
         await provider_with(refuses).generate(ASK)
     assert not slow.value.retryable and "ReadTimeout" in str(slow.value)
     assert dropped.value.retryable
+
+
+async def test_provider_passes_response_format_to_the_request():
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"role": "assistant", "content": '{"label":"docs"}'}}],
+                "usage": {"prompt_tokens": 9, "completion_tokens": 2},
+            },
+        )
+
+    response_format = {"type": "json_object"}
+    reply = await provider_with(handler).generate(
+        ASK,
+        response_format=response_format,
+    )
+
+    assert reply.text == '{"label":"docs"}'
+    assert seen["body"]["response_format"] == response_format

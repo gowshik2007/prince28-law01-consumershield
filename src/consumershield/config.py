@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     # LLM gateway (Day 8). Keys default to empty so tests and CI never need them.
     gemini_api_key: str = ""
     groq_api_key: str = ""
-    llm_primary_model: str = "gemini-3.8-flash"
+    llm_primary_model: str = "gemini-3.5-flash-lite"
     llm_fallback_model: str = "openai/gpt-oss-20b"
 
     # Both providers speak the OpenAI API.
