@@ -1,6 +1,8 @@
 ﻿# ConsumerShield source register
-# Dataset licence: CC BY 4.0. Attribution required.
-# Original legal text sources remain identified in the dataset metadata.
-
+# Licences and reuse terms are recorded per source.
 url,source,licence,title
 https://oss-data-in.vaquill.ai/v2026.08.1/in_central_legislation.parquet,Open India Law,CC BY 4.0,Central Indian Legislation Dataset
+https://consumeraffairs.gov.in/public/upload/files/E%20commerce%20rules_1732703966.pdf,Department of Consumer Affairs,Government publication - reuse terms to verify,Consumer Protection (E-Commerce) Rules 2020
+https://consumeraffairs.gov.in/public/upload/files/CCPA_Notification_1732707665.pdf,Central Consumer Protection Authority,Government Gazette notification - reuse terms to verify,CCPA Misleading Advertisements Guidelines 2022
+https://indiacode.gov.in/server/api/core/bitstreams/0fafbf84-a511-49f7-a923-9bc4f5c54e68/content,India Code,Government publication - reuse terms to verify,Consumer Protection Act 2019
+https://consumeraffairs.gov.in/public/upload/files/CP%20Act%202019_1732700731.pdf,Department of Consumer Affairs,Government publication - reuse terms to verify,Consumer Protection Act 2019

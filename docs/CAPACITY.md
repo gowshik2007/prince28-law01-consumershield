@@ -2,31 +2,24 @@
 
 ## 1. Current Dataset Status
 
-Latest corpus collection and dataset report:
+Latest figures from `DATASET.md`:
 
 | Metric | Measured value |
 |---|---:|
-| Registered sources | 1 |
-| Downloaded source files | 1 |
-| Downloaded source file size | 26,515,484 bytes (approximately 25.29 MiB) |
-| Source dataset records | 74,484 |
-| Consumer Protection Act, 2019 records extracted | 156 |
-| Processed JSONL size | 207,129 bytes |
-| Extracted characters (JSONL plus generated PDF) | 1,308,399 |
-| Estimated tokens (JSONL plus generated PDF) | 327,100 |
-| Estimated chunks | 468 |
-| Manifest records | 1 |
-| Download duration | 3.4 seconds |
-| Repeat-run duration | 0.3 seconds |
-| Repeat-run downloaded | 0 |
-| Repeat-run skipped | 1 |
-| Repeat-run blocked | 0 |
-| Repeat-run failed | 0 |
+| Registered source URLs | 5 |
+| Downloaded manifest records | 854 |
+| Blocked manifest records | 1 |
+| Files in corpus inventory | 1,588 |
+| PDF files | 12 |
+| PDF pages inspected | 200 |
+| Extracted characters | 82,882,007 |
+| Estimated tokens | 20,720,502 |
+| Estimated chunks | 29,601 |
+| Embedding dimensions | 1,536 |
+| Estimated raw vector storage | 173.44 MiB |
+| Estimated embedding cost | $0.414410 |
 
-Dataset: Open India Law - Central Indian Legislation Dataset.
-
-The source dataset is distributed as a Parquet file. The processed corpus contains the matching Consumer Protection Act, 2019 records in JSONL format.
-
+The inventory includes processed files and a generated test PDF derived from JSONL content. Some content may be counted more than once. Manifest records are not equivalent to NCDRC orders. The target of 100 NCDRC orders remains pending.
 ## 2. Processing Assumptions
 
 | Parameter | Value |
@@ -47,13 +40,13 @@ Each vector requires:
 
 1,536 dimensions x 4 bytes = 6,144 bytes.
 
-For the current estimated 468 chunks:
+For the current estimated 29,601 chunks:
 
-468 x 6,144 = 2,875,392 bytes, approximately 2.74 MiB.
+29,601 x 6,144 = 181,868,544 bytes, approximately 173.44 MiB.
 
 | Number of chunks | Approximate raw vector storage |
 |---:|---:|
-| 468 (current estimate) | 2.74 MiB |
+| 29,601 (current estimate) | 173.44 MiB |
 | 1,000 | 5.86 MiB |
 | 5,000 | 29.30 MiB |
 | 10,000 | 58.59 MiB |
@@ -61,19 +54,15 @@ For the current estimated 468 chunks:
 | 100,000 | 585.94 MiB |
 
 Actual database storage will be higher because of indexes, metadata, and database overhead.
-
 ## 4. Embedding Cost
 
 The dataset report uses an assumed price of $0.02 per million input tokens.
 
-For the current estimated 327,100 tokens:
+For the current estimated 20,720,502 tokens:
 
-327,100 / 1,000,000 x $0.02 = approximately $0.006542.
-
-At the planning exchange rate of ₹95 per USD, this is approximately ₹0.10.
+20,720,502 / 1,000,000 x $0.02 = approximately $0.414410.
 
 This is a planning estimate only. No embedding API usage or billing has been measured. Confirm the actual embedding provider and model price before production use.
-
 ## 5. Database Capacity
 
 Production database capacity was checked using PostgreSQL.
@@ -115,19 +104,17 @@ An active HTTP transfer was interrupted against a local HTTP test server. The do
 
 ## 7. Ten-Times Growth Estimate
 
-If the current processed corpus grows by ten times:
+If the current reported corpus inventory grows by ten times:
 
 | Metric | Approximate estimate |
 |---|---:|
-| Characters | 13,083,990 |
-| Tokens | 3,271,000 |
-| Chunks | 4,673 |
-| Raw vector storage | 27.38 MiB |
-| Embedding cost | $0.06542 |
-| Embedding cost at ₹95/USD | Approximately ₹0.98 |
+| Characters | 828,820,070 |
+| Tokens | 207,205,020 |
+| Chunks | 296,010 |
+| Raw vector storage | 1.69 GiB |
+| Embedding cost | $4.14410 |
 
-These are linear planning estimates. Actual storage will be higher after indexes, metadata, and database overhead.
-
+These are linear planning estimates. At this scale, raw vectors alone exceed a 1 GiB storage allowance. Indexes, metadata, and database overhead increase the requirement further.
 ## 8. Capacity Planning Questions and Answers
 
 ### Q1. How much source data has been collected?
@@ -136,28 +123,23 @@ One Parquet source file was downloaded successfully. It contains 74,484 source r
 
 ### Q2. How much processing capacity does the current corpus require?
 
-The combined report inventory contains 1,308,399 extracted characters, approximately 327,100 estimated tokens, and 468 estimated chunks. This includes both processed JSONL text and a generated PDF derived from that text, so it double-counts some content.
-
+The latest combined report inventory contains 82,882,007 extracted characters, approximately 20,720,502 estimated tokens, and 29,601 estimated chunks. It includes processed files and a generated test PDF, so some content may be counted more than once.
 ### Q3. What is the estimated vector storage requirement?
 
-At 1,536 dimensions and float32 precision, 468 estimated vectors require approximately 2.74 MiB of raw vector storage. Database indexes and metadata will increase actual storage requirements.
-
+At 1,536 dimensions and float32 precision, 29,601 estimated vectors require approximately 173.44 MiB of raw vector storage. Database indexes and metadata will increase actual storage requirements.
 ### Q4. What is the estimated embedding cost?
 
-At the report's assumed rate of $0.02 per million tokens, processing 327,100 estimated tokens would cost approximately $0.006542, or about ₹0.10 at ₹95 per USD. This is not actual provider billing.
-
+At the report's assumed rate of $0.02 per million tokens, processing 20,720,502 estimated tokens would cost approximately $0.414410. This is not actual provider billing.
 ### Q5. What is the least certain capacity assumption?
 
 The token estimate uses a rough ratio of four characters per token, not a production tokenizer. The generated test PDF had 106 pages and 432,954 extractable characters, averaging approximately 4,084.5 characters per page or 1,021 estimated tokens per page. This is a derived test document, not an original source PDF.
 
 ### Q6. Can the current corpus fit in the free database plan?
 
-The current database uses approximately 7.70 MiB of the 1 GB storage allowance. The estimated raw vectors require approximately 2.74 MiB. The current corpus is small enough for the available storage, although indexes, metadata, and future application growth must be monitored.
-
+The previously checked database size was approximately 7.70 MiB, but that measurement has not been refreshed alongside the latest corpus report. The latest estimated raw vectors alone require 173.44 MiB. This is approximately 17% of a 1 GiB allowance before indexes, metadata, and other application data. Recheck database usage before production ingestion.
 ### Q7. What happens if the corpus grows ten times?
 
-At ten times the current combined estimate, processing would be approximately 3,271,000 tokens, 4,673 chunks, and 27.38 MiB of raw vectors. Estimated embedding cost would be approximately $0.06542. This remains small compared with the 1 GB storage allowance, before database overhead.
-
+At ten times the latest reported inventory, processing would require approximately 207,205,020 tokens, 296,010 chunks, and 1.69 GiB of raw vectors. Estimated embedding cost would be approximately $4.14410. Raw vector storage alone would exceed a 1 GiB allowance.
 ## 9. Storage and Deployment Considerations
 
 - Keep downloaded source documents under `data/raw/`.
@@ -200,13 +182,13 @@ At ten times the current combined estimate, processing would be approximately 3,
 - [x] Local HTTP interruption and byte-range resume demonstrated; external-source interruption remains untested.
 - [ ] Incremental corpus ingestion tested end to end.
 
-## Latest verified status — 23 November 2026
+## Historical verified status â€” 23 November 2026
 
 - Processed legislation records: 371 across three Act JSONL files.
 - Processed CCPA order-listing metadata records: 96.
 - Combined processed records: 467 (legislation and listing metadata; not all full legal documents).
 - CCPA full order documents downloaded: 0.
-- Dataset report: 1,308,399 combined characters, approximately 327,100 tokens, and 468 estimated chunks; some content is duplicated between JSONL and the generated PDF.
+- Historical dataset report (23 November): 1,308,399 combined characters, approximately 327,100 tokens, and 468 estimated chunks. Superseded by the 25 November measurements above.
 - Source register: 1 registered source (Open India Law).
 - Automated tests: 36 passed.
 - Ruff lint: passed.
@@ -220,22 +202,25 @@ At ten times the current combined estimate, processing would be approximately 3,
 - Reconcile capacity estimates with the latest dataset report.
 
 
-## Latest dataset measurements
+## Latest dataset measurements — 25 November 2026
 
 These figures come from the regenerated `DATASET.md` report:
 
 | Metric | Latest value |
 |---|---:|
-| Extracted characters (JSONL plus generated PDF) | 1,308,399 |
-| Estimated tokens (JSONL plus generated PDF) | 327,100 |
-| Estimated chunks | 468 |
-| Estimated raw vector storage | 2.74 MiB |
-| Estimated embedding cost at $0.02/million tokens | $0.006542 |
-| PDF pages inspected (generated test PDF) | 106 |
+| Registered source URLs | 5 |
+| Downloaded manifest records | 854 |
+| Blocked manifest records | 1 |
+| Files in corpus inventory | 1,588 |
+| PDF files | 12 |
+| PDF pages inspected | 200 |
+| Extracted characters | 82,882,007 |
+| Estimated tokens | 20,720,502 |
+| Estimated chunks | 29,601 |
+| Estimated raw vector storage | 173.44 MiB |
+| Estimated embedding cost at $0.02/million tokens | $0.414410 |
 
-The generated test PDF has 106 pages, all with extractable text, averaging approximately 4,084.5 characters or 1,021 estimated tokens per page. It is not an original government-source PDF. The four capacity answers above remain planning estimates where applicable.
-
-
+The inventory includes generated and processed files. Manifest records are not equivalent to full legal documents or NCDRC orders. The target of 100 NCDRC orders remains pending.
 ### Additional recovery test evidence (23 November 2026)
 
 An active transfer was interrupted against a local HTTP test server. The downloader preserved 524,288 bytes, resumed from byte 524,288 with HTTP 206 Partial Content, and reconstructed the 8,388,608-byte payload with a matching SHA-256 checksum. This verifies interruption and byte-range resume locally; an external-source interruption remains untested.
