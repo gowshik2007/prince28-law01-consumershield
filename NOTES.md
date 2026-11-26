@@ -374,7 +374,7 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 - Answer the four capacity-planning questions in `docs/CAPACITY.md`.
 - If partial-download recovery is a strict requirement, perform and document a separate interruption test.
 
-## Day 6 ? verified update (23 November 2026)
+## Day 6 — verified update (23 November 2026)
 
 - Processed 96 unique CCPA order-listing metadata records into `data/processed/ccpa_orders_metadata.jsonl`.
 - Original CCPA metadata remains preserved under `data/raw/ccpa-orders/`.
@@ -383,7 +383,6 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 - Dataset report regenerated: 875,445 extracted characters, approximately 218,862 tokens, and 313 estimated chunks.
 - Validation: 36 tests passed; Ruff lint passed; 45 files passed formatting check.
 - Remaining: 4 more CCPA listing records to reach 100, full order documents subject to permission, and the outstanding rules/guidelines corpus.
-
 
 ### Actual interruption and resume test (23 November 2026)
 
@@ -471,16 +470,44 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 
 | File | Format | Parser A | Parser B | A pages | B pages | A chars | B chars | A tables | B tables | A time (s) | B time (s) | Review / result |
 |---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| data/raw/007-Document_Parsing_PDFs_HTML_Tables_OCR.pdf | .pdf | PyMuPDF | pypdf | 13 | 13 | 15432 | 14850 | 12 | 2 | 2.333 | 0.287 | PyMuPDF extracted more characters; inspect quality |
-| data/raw/sample-scanned.pdf | .pdf | PyMuPDF | pypdf | 0 | 0 | 0 | 0 | 0 | 0 | 0.027 | 0.006 | One or both parsers failed; inspect errors |
-| data/processed/capacity_test_corpus.pdf | .pdf | PyMuPDF | pypdf | 106 | 106 | 430983 | 426913 | 0 | 0 | 1.045 | 1.748 | PyMuPDF extracted more characters; inspect quality |
-| data/raw/Fitness Journal.html | .html | Trafilatura | Plain tag-stripping | 1 | 1 | 383 | 1337 | 0 | 0 | 0.061 | 0.010 | Plain tag-stripping extracted more characters; inspect quality |
-| data/raw/sample-table-no-gridlines.pdf | .pdf | PyMuPDF | pypdf | 1 | 1 | 555 | 539 | 0 | 0 | 0.043 | 0.018 | PyMuPDF extracted more characters; inspect quality |
-| data/raw/sample-multipage.pdf | .pdf | PyMuPDF | pypdf | 10 | 10 | 7096 | 6811 | 0 | 0 | 0.079 | 0.148 | PyMuPDF extracted more characters; inspect quality |
-| data/raw/sample-scanned-table.pdf | .pdf | PyMuPDF | pypdf | 0 | 0 | 0 | 0 | 0 | 0 | 0.049 | 0.003 | One or both parsers failed; inspect errors |
-| data/raw/sample-two-column.pdf | .pdf | PyMuPDF | pypdf | 2 | 2 | 5051 | 4967 | 0 | 0 | 0.039 | 0.093 | PyMuPDF extracted more characters; inspect quality |
-| data/raw/sample-bank-statement.pdf | .pdf | PyMuPDF | pypdf | 2 | 2 | 2682 | 2568 | 0 | 0 | 0.201 | 0.074 | PyMuPDF extracted more characters; inspect quality |
-| data/raw/sample-invoice.pdf | .pdf | PyMuPDF | pypdf | 1 | 1 | 984 | 900 | 1 | 0 | 0.131 | 0.024 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/007-Document_Parsing_PDFs_HTML_Tables_OCR.pdf | .pdf | PyMuPDF | pypdf | 13 | 13 | 15432 | 14850 | 12 | 2 | 2.578 | 0.313 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/department-of-consumer-affairs/e-commerce-rules-1732703966-4db15cc1.pdf | .pdf | PyMuPDF | pypdf | 11 | 11 | 36222 | 35818 | 0 | 0 | 1.591 | 1.326 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/department-of-consumer-affairs/cp-act-2019-1732700731-e507b033.pdf | .pdf | PyMuPDF | pypdf | 40 | 40 | 127405 | 127785 | 0 | 0 | 0.563 | 0.778 | Both parsers extract almost identical readable legal content, including headings and Section 1. PyMuPDF has slightly cleaner line formatting and is faster (0.563s vs 0.778s); pypdf extracts 380 more characters, with no meaningful quality advantage. |
+| data/raw/central-consumer-protection-authority/ccpa-notification-1732707665-3103f017.pdf | .pdf | PyMuPDF | pypdf | 11 | 11 | 37013 | 36485 | 0 | 0 | 1.134 | 1.309 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-scanned.pdf | .pdf | PyMuPDF | pypdf | 0 | 0 | 0 | 0 | 0 | 0 | 0.038 | 0.004 | One or both parsers failed; inspect errors |
+| data/processed/capacity_test_corpus.pdf | .pdf | PyMuPDF | pypdf | 106 | 106 | 430983 | 426913 | 0 | 0 | 0.951 | 1.796 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/Fitness Journal.html | .html | Trafilatura | Plain tag-stripping | 1 | 1 | 383 | 1337 | 0 | 0 | 0.040 | 0.007 | Plain tag-stripping extracted more characters; inspect quality |
+| data/raw/sample-table-no-gridlines.pdf | .pdf | PyMuPDF | pypdf | 1 | 1 | 555 | 539 | 0 | 0 | 0.025 | 0.017 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-multipage.pdf | .pdf | PyMuPDF | pypdf | 10 | 10 | 7096 | 6811 | 0 | 0 | 0.075 | 0.126 | PyMuPDF extracted more characters; inspect quality |
+| data/raw/sample-scanned-table.pdf | .pdf | PyMuPDF | pypdf | 0 | 0 | 0 | 0 | 0 | 0 | 0.050 | 0.002 | One or both parsers failed; inspect errors |
+
+### D07 · Parsing my corpus
+
+- Files in the manifest: 1,568 generated legal documents · parsed: 1,568 · failed: 0 · pages in Postgres: 29,227
+- Parsing coverage: 100% of generated documents
+
+### Failures by reason
+
+| Reason | Files | What I did |
+|---|---:|---|
+| No failures recorded | 0 | No retry or fix was required |
+
+- The one I fixed: None — no failed files were recorded, so a failed-file fix was not required.
+
+### What I saw when I read my parsed pages
+
+- A page where the heading path is right (document, page, path): A page with heading metadata was confirmed during the earlier Neon inspection, but the exact document, page number and full heading path still need to be recorded.
+- Something that came out wrong (document, page, what): Motor Vehicles Act, page 157 — content from Sections 215 and 216 appears on the page, while the stored heading path starts at Section 215.
+- A table: The Customs Tariff Act, 1975 has 601 extracted tables. Whether the stored output is a proper Markdown grid or loose text still needs manual verification.
+
+### My parser choice
+
+- For PDFs I use PyMuPDF because it extracted 12 tables compared with pypdf's 2 in the table-heavy test PDF. In the Consumer Protection Act comparison, PyMuPDF took 0.563 seconds compared with pypdf's 0.778 seconds. The inspected text was almost identical, with slightly cleaner line formatting from PyMuPDF.
+- A kind of document in my corpus that neither parser handles well: Scanned PDFs without an OCR text layer. Both parsers returned zero extracted characters for the scanned test PDFs.
+
+### One thing that went wrong today, and how I fixed it
+
+- The integration tests initially failed because Docker was not running and PostgreSQL was unavailable. I started Docker Desktop, brought up the Docker Compose services and reran the integration tests successfully.
 
 ### Manual inspection
 
@@ -492,55 +519,22 @@ sources=1 downloaded=0 skipped=1 blocked=0 failed=0 seconds=0.3
 
 ### Parser comparison observations
 
-- data/raw/007-Document_Parsing_PDFs_HTML_Tables_OCR.pdf: PyMuPDF extracted 15432 characters and 12 tables in 2.333s; pypdf extracted 14850 characters and 2 tables in 0.287s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/sample-scanned.pdf: PyMuPDF extracted 0 characters and 0 tables in 0.027s; pypdf extracted 0 characters and 0 tables in 0.006s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/processed/capacity_test_corpus.pdf: PyMuPDF extracted 430983 characters and 0 tables in 1.045s; pypdf extracted 426913 characters and 0 tables in 1.748s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/Fitness Journal.html: Trafilatura extracted 383 characters and 0 tables in 0.061s; Plain tag-stripping extracted 1337 characters and 0 tables in 0.010s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/sample-table-no-gridlines.pdf: PyMuPDF extracted 555 characters and 0 tables in 0.043s; pypdf extracted 539 characters and 0 tables in 0.018s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/sample-multipage.pdf: PyMuPDF extracted 7096 characters and 0 tables in 0.079s; pypdf extracted 6811 characters and 0 tables in 0.148s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/sample-scanned-table.pdf: PyMuPDF extracted 0 characters and 0 tables in 0.049s; pypdf extracted 0 characters and 0 tables in 0.003s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/sample-two-column.pdf: PyMuPDF extracted 5051 characters and 0 tables in 0.039s; pypdf extracted 4967 characters and 0 tables in 0.093s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/sample-bank-statement.pdf: PyMuPDF extracted 2682 characters and 0 tables in 0.201s; pypdf extracted 2568 characters and 0 tables in 0.074s. Character counts alone do not establish extraction quality; inspect the actual content.
-- data/raw/sample-invoice.pdf: PyMuPDF extracted 984 characters and 1 tables in 0.131s; pypdf extracted 900 characters and 0 tables in 0.024s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/007-Document_Parsing_PDFs_HTML_Tables_OCR.pdf`: PyMuPDF extracted 15432 characters and 12 tables in 2.578s; pypdf extracted 14850 characters and 2 tables in 0.313s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/department-of-consumer-affairs/e-commerce-rules-1732703966-4db15cc1.pdf`: PyMuPDF extracted 36222 characters and 0 tables in 1.591s; pypdf extracted 35818 characters and 0 tables in 1.326s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/department-of-consumer-affairs/cp-act-2019-1732700731-e507b033.pdf`: Both parsers extracted almost identical readable legal content, including the Act title, Chapter I and Section 1. PyMuPDF extracted 127405 characters in 0.563s; pypdf extracted 127785 characters in 0.778s. PyMuPDF had slightly cleaner line formatting and was faster. The additional 380 characters from pypdf did not demonstrate a meaningful quality advantage.
+- `data/raw/central-consumer-protection-authority/ccpa-notification-1732707665-3103f017.pdf`: PyMuPDF extracted 37013 characters and 0 tables in 1.134s; pypdf extracted 36485 characters and 0 tables in 1.309s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/sample-scanned.pdf`: PyMuPDF extracted 0 characters and 0 tables in 0.038s; pypdf extracted 0 characters and 0 tables in 0.004s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/processed/capacity_test_corpus.pdf`: PyMuPDF extracted 430983 characters and 0 tables in 0.951s; pypdf extracted 426913 characters and 0 tables in 1.796s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/Fitness Journal.html`: Trafilatura extracted 383 characters and 0 tables in 0.040s; Plain tag-stripping extracted 1337 characters and 0 tables in 0.007s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/sample-table-no-gridlines.pdf`: PyMuPDF extracted 555 characters and 0 tables in 0.025s; pypdf extracted 539 characters and 0 tables in 0.017s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/sample-multipage.pdf`: PyMuPDF extracted 7096 characters and 0 tables in 0.075s; pypdf extracted 6811 characters and 0 tables in 0.126s. Character counts alone do not establish extraction quality; inspect the actual content.
+- `data/raw/sample-scanned-table.pdf`: PyMuPDF extracted 0 characters and 0 tables in 0.050s; pypdf extracted 0 characters and 0 tables in 0.002s. Character counts alone do not establish extraction quality; inspect the actual content.
 
 ### Corpus limitation
 
-- Available PDF files in data/: 9.
+- Available PDF files in data/: 12.
 - Available HTML files in data/: 1.
 - Files compared in this run: 10.
 - HTML parser comparison has been tested using Fitness Journal.html.
-- The ten-file comparison requirement is complete: 9 PDFs and 1 HTML file were compared.
-- The original separate 364-file corpus was not available; public sample PDFs were used to complete the ten-file comparison.
-
-
-## D07 - Parsing my corpus
-
-### D07 - Parsing my corpus
-
-- Files in the manifest: 1,569 (including 1 source Parquet dataset) - parsed: 1,568 - failed: 0 - pages in Postgres: 29,227.
-- Parsing coverage: 100% of 1,568 individual Act documents (excluding the source Parquet entry).
-
-### Failures by reason
-
-| Reason | Files | What I did |
-|---|---:|---|
-| None | 0 | No parse failures were recorded; no retry or fix was required. |
-
-- The one I fixed: None. No individual file failure was recorded.
-
-### What I saw when I read my parsed pages
-
-- A page where the heading path is right: Abkari, Bengal Act, 1840, page 2, Section XI.
-- Something that came out wrong: Abkari, Calcutta, 1849, page 2 contains Sections IV and IX, but the heading path identifies only Section IV.
-- A table: The Customs Tariff Act, 1975, page 1. The extracted content uses loose text with pipe separators, not a Markdown grid.
-
-### My parser choice
-
-- For PDFs I use PyMuPDF because the 007 sample PDF produced 15,432 characters and 12 tables, compared with pypdf's 14,850 characters and 2 tables.
-- PyMuPDF extracted more table content in that comparison, although pypdf was faster (0.287 seconds versus 2.333 seconds).
-- A kind of document neither parser handles well: scanned/image-only PDFs without an embedded text layer; both require OCR.
-
-### One thing that went wrong today, and how I fixed it
-
-- The Neon database hostname temporarily failed DNS resolution during a parser retry.
-- I checked DNS resolution, waited for connectivity to recover, and reran the parser successfully. The second run confirmed 1,568 documents already parsed and zero failures.
+- The ten-file requirement remains incomplete because fewer than ten suitable PDF/HTML files are currently available in data/.
+- The available test files are not the original separate 364-file corpus mentioned in the exercise.
