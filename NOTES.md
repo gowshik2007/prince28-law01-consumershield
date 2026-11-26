@@ -817,3 +817,55 @@ Usage and billing verification:
 - Fallback used: Yes
 
 **Result:** Live streaming successfully returned a response. The LLM gateway, fallback mechanism, and production usage tracking were verified.
+
+
+## Prompt comparison
+
+| Prompt | Accuracy | Correct | Misses |
+|---|---:|---:|---:|
+| classify_v1 | 55.0% | 11/20 | 9 |
+| classify_v2 | 95.0% | 19/20 | 1 |
+| classify_v3 | 100.0% | 20/20 | 0 |
+| classify_v4 | 100.0% | 20/20 | 0 |
+
+## Extraction trial — extract_v1
+
+- The Companies Act, 2013: the extracted `year` is null even though 2013 is explicit in the document title.
+- The Code of Civil Procedure, 1908: the extracted `year` is null. The DocMeta schema currently rejects years before 1950, so the valid year 1908 cannot be stored.
+
+
+## Day 09 — Versioned prompts and metadata extraction
+
+### Question router
+
+- Evaluation set: 20 questions.
+- `classify_v1`: 55% (11/20).
+- `classify_v2`: 95% (19/20).
+- `classify_v3`: 100% (20/20).
+- `classify_v4`: 100% (20/20).
+- Final prompt: `classify_v4`.
+- Final prompt change: explicitly routes questions about legal provisions, consumer rights, remedies, and consumer-law decisions to `docs` when the collected documents can answer them.
+- Remaining incorrect questions in the best version: None (20/20).
+- Input tokens per question and comparison cost: Not recorded by the comparison script or found in the usage database.
+
+### Metadata extraction
+
+- Prompt version: `extract_v1`.
+- Metadata records verified in the documents table: 63.
+- Stored extraction errors among those records: 0.
+- Neon usage records: 86 successful model calls and 60 failed model calls.
+- Successful-call input tokens: 232,227.
+- Successful-call output tokens: 37,188.
+- Recorded successful-call cost: Rs 4.6300.
+- Average cost per successful model call: Rs 0.0538.
+- The 86 successful calls are model calls, not necessarily 86 unique documents.
+- Most common validation issue observed: document years before 1950 are rejected by the current `DocMeta.year` constraint. Repairs can leave the year null.
+- Valid but incorrect metadata example: The Companies Act, 2013 was extracted with `year` set to null, despite the year being present in its title.
+- Extraction was not completed for the full parsed corpus.
+
+### Day 09 outcome
+
+- Versioned classification prompts and the 20-question evaluation set are in place.
+- The best router prompt achieved 100% accuracy on the evaluation set.
+- Metadata extraction and usage tracking were verified.
+- Prompt-comparison token usage was not available in the recorded usage data.
