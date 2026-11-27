@@ -1,1 +1,1 @@
-"""ConsumerShield: production FastAPI service (Prince 2028 GenAI program)."""
+"""Background work: jobs wait in Redis, a worker process takes them one by one."""
