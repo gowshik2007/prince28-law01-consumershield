@@ -869,3 +869,56 @@ Usage and billing verification:
 - The best router prompt achieved 100% accuracy on the evaluation set.
 - Metadata extraction and usage tracking were verified.
 - Prompt-comparison token usage was not available in the recorded usage data.
+
+## Day 10 — Background ingestion, queue and worker
+
+### First ingestion run
+
+- Documents queued: 7.
+- Finished in approximately 30.7 seconds.
+- Done: 6.
+- Skipped: 0.
+- Failed: 1.
+- The failed document was a Parquet file with the error `unsupported_type`.
+- Approximate pace: 4.4 seconds per queued document.
+- Configuration: `INGEST_RPM = 12`, `INGEST_CONCURRENCY = 2`.
+
+### Worker kill and recovery test
+
+- Target: 20 queued documents.
+- The 20-document kill test was not performed because no new eligible downloaded documents were available.
+- The ingestion planner reported that all downloaded manifest documents were already ingested.
+- Worker interruption and restart recovery were not verified.
+- Duplicate-document SQL verification was not performed.
+
+### Dead-letter list
+
+| Stage | Items | What I did |
+|---|---:|---|
+| Parse | 2 | Retried the unsupported Parquet file. It failed again with `unsupported_type`. |
+
+### Live ingestion
+
+- ConsumerShield on Render: Not tested during this lab.
+- Request without the admin token: Not tested during this lab.
+
+### Week 2 capacity comparison
+
+- `docs/CAPACITY.md`: estimated 20,720,502 tokens and recorded 200 inspected PDF pages.
+- `docs/INGEST_REPORT.md`: 20,298,668 estimated tokens and 29,252 database pages.
+- Difference: 421,834 fewer tokens than estimated, approximately 2.04% below the capacity estimate.
+- The page counts are not directly comparable: one is inspected PDF pages and the other is pages stored in the database. The token figures also represent different corpus measurements.
+
+### Docker Compose and report
+
+- Added `REDIS_URL` to the shared Docker Compose environment.
+- Configured the API and worker to load optional `.env` values.
+- Added the ARQ worker as a separate Docker Compose service.
+- `docker compose config --quiet` passed.
+- Created `scripts/ingest_report.py`.
+- Generated `docs/INGEST_REPORT.md` from database information.
+- Report recorded 1,534 documents, 29,252 pages, 20,298,668 estimated tokens and 2 failed ingestion items.
+
+### One thing that went wrong today, and how I fixed it
+
+- The first ingestion API request returned an error. I restarted the API and used the explicit local API URL. The ingestion then processed 6 documents and recorded 1 unsupported Parquet file as failed.
